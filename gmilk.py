@@ -1,7 +1,16 @@
 #!/usr/bin/python
 import pygtk
 pygtk.require('2.0')
+
 import gtk
+import urllib
+import hashlib 
+
+RTM_API_KEY = "a4ab81f86a5276cf2145f92c8f74a486"
+RTM_SHARED_SECRET = "7d068fd399131d9e"
+RTM_SERVICE_METHODS = "http://www.rememberthemilk.com/services/rest/"
+RTM_SERVICE_AUTH = "http://www.rememberthemilk.com/services/auth/"
+RTM_HOME = "http://www.rememberthemilk.com/home/"
 
 class Gmilk:
 
