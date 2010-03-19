@@ -1,3 +1,4 @@
+import sys
 import urllib
 import hashlib 
 import xml.dom.minidom
@@ -20,13 +21,13 @@ class Rtm:
 			rsp = self.get_response(url)
 			return rsp.getElementsByTagName("frob")[0].childNodes[0].data
 		except Exception as detail:
-			print "error on get_frob", detail
+			sys.stderr.write("Error on get_frob: "+detail)
 
 	def get_url(self, base_url, args, with_auth_token=True, with_frob=None):
 		try:
 			args = self.sign_args(args, with_auth_token, with_frob)
 		except Exception:
-			print "error on get_url"
+			sys.stderr.write("Error on get_url: "+detail)
 		return base_url + '?' + urllib.urlencode(args)
     
 	def sign_args(self, args, with_auth_token=True, with_frob=None):
@@ -44,8 +45,8 @@ class Rtm:
 
 			args['api_key'] = RTM_API_KEY
 			args['api_sig'] = self.get_signature(args)
-		except Exception:
-			print "error on sign_args"
+		except Exception as detail:
+			sys.stderr.write("Error on sign_args: "+detail)
 		return args
         
 	def get_response(self, url):
@@ -74,3 +75,12 @@ class Rtm:
 		code = err.getAttribute('code')
 		msg = err.getAttribute('msg')
 		raise Exception, "%s: %s" % (code, msg)
+     
+	def auth_url(self, perms):
+		"""
+		Give this URL to the user that he can give permission to this application
+		@param token: Can be read, write or delete
+		"""
+		frob = self.get_frob()
+		args = {'perms': perms}
+		return (self.get_url(RTM_SERVICE_AUTH, args, False, frob), frob)
