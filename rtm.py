@@ -1,4 +1,6 @@
 import sys
+import locale
+import gettext
 import urllib
 import hashlib 
 import xml.dom.minidom
@@ -9,9 +11,13 @@ RTM_SERVICE_METHODS = "http://www.rememberthemilk.com/services/rest/"
 RTM_SERVICE_AUTH = "http://www.rememberthemilk.com/services/auth/"
 RTM_HOME = "http://www.rememberthemilk.com/home/"
 
+APP = "gmilk"
+DIR = "locale"
+
 class Rtm:
 
-	def __init__(self):
+	def __init__(self,ui):
+		self.ui = ui
 		self.auth_token = ""
 
 	def get_frob(self):
