@@ -36,7 +36,7 @@ class Gmilk:
       gtk.main()
 
    def init(self):
-      rtm = Rtm(self)
+      self.rtm = Rtm(self)
 
    def popup_menu(self, widget, button, time, data = None):
       if button == 3:
@@ -46,13 +46,49 @@ class Gmilk:
    def quit(self,widget,data=None):
       gtk.main_quit()
 
-   def authorize(self,widget,data=None):
-      pass
+   def show_error(self,msg):
+		self.show_dialog(gtk.MESSAGE_ERROR)
 
-   def auth_dialog(self):
-      print "estou no dialogo"
-      dialog = gtk.Dialog(_("Asking authorization"),None,0,(_("Ask"),_("Cancel")))
-      dialog.show()
+   def show_error(self,msg):
+		self.show_dialog(gtk.MESSAGE_INFO)
+
+   def show_dialog(msg_type):		
+		dialog = gtk.MessageDialog(None,gtk.DIALOG_MODAL,msg_type,gtk.BUTTONS_OK,msg)
+		dialog.run()
+		dialog.destroy()
+
+   def authorize(self,widget,data=None):
+		(url,frob) = self.rtm.auth_url("delete")
+		label		= gtk.Label(_("Please enter the following URL on your browser"))
+		text		= gtk.Entry()
+		dialog	= gtk.Dialog(_("Asking authorization"),None,gtk.DIALOG_MODAL,(gtk.STOCK_OK, gtk.RESPONSE_ACCEPT, gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT))
+
+		text.set_text(url)
+		text.set_editable(False)
+
+		dialog.vbox.pack_start(label)
+		dialog.vbox.pack_start(text)
+		label.show()
+		text.show()
+		response = dialog.run()
+		dialog.destroy()
+
+		if response==gtk.RESPONSE_REJECT:
+			self.show_error(_("You need authorization to use this app"))
+			return
+
+		try:
+			token = self.rtm.get_auth_token(frob)
+		except Exception as detail:
+			self.show_error(_("Did you give authorization to this app? Please try again."))
+			return
+
+		print "token:"
+		print token
+		if self.rtm.check_token(token):
+			self.show_info(_("You should now be able to use this app now."))
+		else:
+			self.show_error(_("Invalid authorization, please try again."))
 
 if __name__ == "__main__":
    gmilk = Gmilk()
