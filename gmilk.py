@@ -3,6 +3,7 @@ import locale
 import gettext
 import gtk
 import pygtk
+import gconf
 
 pygtk.require('2.0')
 
@@ -32,6 +33,11 @@ class Gmilk:
 
       self.statusIcon.connect('popup-menu', self.popup_menu, self.menu)
       self.statusIcon.set_visible(1)
+
+      self.gconf	= gconf.client_get_default()
+      self.frob	= self.gconf.get_string("/apps/gmilk/frob")
+      self.token	= self.gconf.get_string("/apps/gmilk/token")
+
       self.init()
       gtk.main()
 
@@ -47,18 +53,21 @@ class Gmilk:
       gtk.main_quit()
 
    def show_error(self,msg):
-		self.show_dialog(gtk.MESSAGE_ERROR)
+		self.show_dialog(gtk.MESSAGE_ERROR,msg)
 
-   def show_error(self,msg):
-		self.show_dialog(gtk.MESSAGE_INFO)
+   def show_info(self,msg):
+		self.show_dialog(gtk.MESSAGE_INFO,msg)
 
-   def show_dialog(msg_type):		
+   def show_dialog(self,msg_type,msg):		
 		dialog = gtk.MessageDialog(None,gtk.DIALOG_MODAL,msg_type,gtk.BUTTONS_OK,msg)
 		dialog.run()
 		dialog.destroy()
 
    def authorize(self,widget,data=None):
 		(url,frob) = self.rtm.auth_url("delete")
+
+		self.gconf.set_string("/apps/gmilk/frob",frob)
+
 		label		= gtk.Label(_("Please enter the following URL on your browser"))
 		text		= gtk.Entry()
 		dialog	= gtk.Dialog(_("Asking authorization"),None,gtk.DIALOG_MODAL,(gtk.STOCK_OK, gtk.RESPONSE_ACCEPT, gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT))
@@ -83,10 +92,9 @@ class Gmilk:
 			self.show_error(_("Did you give authorization to this app? Please try again."))
 			return
 
-		print "token:"
-		print token
 		if self.rtm.check_token(token):
-			self.show_info(_("You should now be able to use this app now."))
+			self.show_info(_("Authorized! You should now be able to use this app now."))
+			self.gconf.set_string("/apps/gmilk/token",token)
 		else:
 			self.show_error(_("Invalid authorization, please try again."))
 
