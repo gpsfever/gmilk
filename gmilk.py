@@ -1,4 +1,13 @@
 #!/usr/bin/python
+__appname__    = "Gmilk"
+__author__     = "Eustaquio 'TaQ' Rangel"
+__copyright__  = "2010 Eustaquio 'TaQ' Rangel"
+__version__    = "0.0.1"
+__license__    = "GPL"
+__email__      = "eustaquiorangel@gmail.com"
+__website__    = "http://github.com/taq/gmilk"
+__date__       = "$Date: 2010/04/08 12:00:00$"
+
 import threading
 import locale
 import gettext
@@ -182,14 +191,14 @@ class Gmilk:
 
    def about(self,widget,data=None):
       self.about = gtk.AboutDialog()
-      self.about.set_name("Gmilk")
-      self.about.set_program_name("Gmilk")
-      self.about.set_version("0.0.1")
-      self.about.set_copyright("Eustaquio 'TaQ' Rangel")
-      self.about.set_license("GPL")
-      self.about.set_website("http://github.com/taq/gmilk")
-      self.about.set_website_label("http://github.com/taq/gmilk")
-      self.about.set_authors(["Eustaquio 'TaQ' Rangel <eustaquiorangel@gmail.com>"])
+      self.about.set_name(__appname__)
+      self.about.set_program_name(__appname__)
+      self.about.set_version(__version__)
+      self.about.set_copyright(__copyright__)
+      self.about.set_license(__license__)
+      self.about.set_website(__website__)
+      self.about.set_website_label(__website__)
+      self.about.set_authors(["%s <%s>" % (__author__,__email__)])
       self.about.show()
 
 if __name__ == "__main__":
