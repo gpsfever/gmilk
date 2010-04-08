@@ -17,25 +17,20 @@ _ = gettext.gettext
 class Gmilk:
 
    def __init__(self):
+      self.menu = gtk.Menu()
+
       self.statusIcon = gtk.StatusIcon()
       self.statusIcon.set_from_file("./images/rememberthemilk.png")
       self.statusIcon.set_visible(True)
       self.statusIcon.set_tooltip("Remember the milk")
-
-      self.menu = gtk.Menu()
-
       self.statusIcon.connect('activate'  , self.left_click , self.menu)
       self.statusIcon.connect('popup-menu', self.right_click, self.menu)
       self.statusIcon.set_visible(1)
+
+      self.menuItem = gtk.MenuItem(_("Asking the task list to Remember the Milk ..."));
+      self.menu.append(self.menuItem);
+
       self.init()
-
-      self.menuItem = gtk.MenuItem(_("Authorize"))
-      self.menuItem.connect('activate', self.authorize, self.statusIcon)
-      self.menu.append(self.menuItem)
-
-      self.menuItem = gtk.MenuItem(_("Quit"))
-      self.menuItem.connect('activate', self.quit, self.statusIcon)
-      self.menu.append(self.menuItem)
       gtk.main()
 
    def init(self):
@@ -43,6 +38,8 @@ class Gmilk:
       self.frob	= self.gconf.get_string("/apps/gmilk/frob")
       self.token	= self.gconf.get_string("/apps/gmilk/token")
       self.rtm = Rtm(self)
+
+      self.menu.remove(self.menuItem)
 
       if self.rtm.check_token(self.token):
          self.rtm.set_auth_token(self.token)
@@ -54,9 +51,17 @@ class Gmilk:
          self.add_tasks(_("Today tasks"),today_tasks)
          self.add_tasks(_("Tomorrow tasks"),tomorrow_tasks)
          self.add_tasks(_("Due tasks"),due_tasks)
+      else:
+         self.menuItem = gtk.MenuItem(_("Authorize"))
+         self.menuItem.connect('activate', self.authorize, self.statusIcon)
+         self.menu.append(self.menuItem)
+
+      self.menuItem = gtk.MenuItem(_("Quit"))
+      self.menuItem.connect('activate', self.quit, self.statusIcon)
+      self.menu.append(self.menuItem)
 
    def add_tasks(self,title,tasks):
-      self.menuItem = gtk.MenuItem(title,True)
+      self.menuItem = gtk.MenuItem(title)
       self.menu.append(self.menuItem)
 
       for task in tasks:
