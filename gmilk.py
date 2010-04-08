@@ -24,7 +24,8 @@ class Gmilk:
 
       self.menu = gtk.Menu()
 
-      self.statusIcon.connect('popup-menu', self.popup_menu, self.menu)
+      self.statusIcon.connect('activate'  , self.left_click , self.menu)
+      self.statusIcon.connect('popup-menu', self.right_click, self.menu)
       self.statusIcon.set_visible(1)
       self.init()
 
@@ -55,7 +56,7 @@ class Gmilk:
          self.add_tasks(_("Due tasks"),due_tasks)
 
    def add_tasks(self,title,tasks):
-      self.menuItem = gtk.MenuItem(title)
+      self.menuItem = gtk.MenuItem(title,True)
       self.menu.append(self.menuItem)
 
       for task in tasks:
@@ -65,10 +66,15 @@ class Gmilk:
 
       self.menu.append(gtk.SeparatorMenuItem())
 
-   def popup_menu(self, widget, button, time, data = None):
-      if button == 3:
-         data.show_all()
-         data.popup(None, None, gtk.status_icon_position_menu, 3, time, self.statusIcon)
+   def right_click(self, widget, button, time, data = None):
+      self.show_menu(widget,button,time,data)
+
+   def left_click(self,widget,data):
+      self.show_menu(widget,0,gtk.get_current_event_time(),data)
+
+   def show_menu(self,widget,button,time,data):
+      data.show_all()
+      data.popup(None, None, gtk.status_icon_position_menu, button, time, self.statusIcon)
 
    def quit(self,widget,data=None):
       gtk.main_quit()
