@@ -98,12 +98,12 @@ class Gmilk:
 
       today_tasks    = self.rtm.get_task_list("due:today")
       tomorrow_tasks = self.rtm.get_task_list("due:tomorrow")
-      due_tasks      = self.rtm.get_task_list("dueBefore:today NOT completedBefore:today")
+      due_tasks      = self.rtm.get_task_list("dueBefore:today NOT (completedBefore:today or completed:today)")
 
       self.clear_menu()
-      self.add_tasks(_("Today tasks"),today_tasks)
-      self.add_tasks(_("Tomorrow tasks"),tomorrow_tasks)
-      self.add_tasks(_("Due tasks"),due_tasks)
+      self.add_tasks(_("No tasks today")    if len(today_tasks)<1    else _("Today tasks"),today_tasks)
+      self.add_tasks(_("No tasks tomorrow") if len(tomorrow_tasks)<1 else _("Tomorrow tasks"),tomorrow_tasks)
+      self.add_tasks(_("No due tasks")      if len(due_tasks)<1      else _("Due tasks"),due_tasks)
       self.tasks_alert(len(today_tasks),len(tomorrow_tasks),len(due_tasks))
 
       self.make_about_menuitem()
