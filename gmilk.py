@@ -48,7 +48,7 @@ class Gmilk:
       self.gconf	= gconf.client_get_default()
       self.frob	= self.gconf.get_string("/apps/gmilk/frob")
       self.token	= self.gconf.get_string("/apps/gmilk/token")
-      self.rtm = Rtm(self)
+      self.rtm    = Rtm(self)
 
       if self.rtm.check_token(self.token):
          self.rtm.set_auth_token(self.token)
@@ -68,6 +68,10 @@ class Gmilk:
          self.menuItem.connect('activate', self.authorize, self.statusIcon)
          self.menu.append(self.menuItem)
 
+      self.menuItem = gtk.MenuItem(_("About"))
+      self.menuItem.connect('activate', self.about, self.statusIcon)
+      self.menu.append(self.menuItem)
+
       self.menuItem = gtk.MenuItem(_("Quit"))
       self.menuItem.connect('activate', self.quit, self.statusIcon)
       self.menu.append(self.menuItem)
@@ -80,7 +84,7 @@ class Gmilk:
       self.menu.append(self.menuItem)
 
       for task in tasks:
-         self.menuItem = gtk.MenuItem(task.name)
+         self.menuItem = gtk.MenuItem("- "+task.name)
          self.menuItem.connect('activate', self.quit, self.statusIcon)
          self.menu.append(self.menuItem)
 
@@ -146,6 +150,18 @@ class Gmilk:
 			self.gconf.set_string("/apps/gmilk/token",token)
 		else:
 			self.show_error(_("Invalid authorization, please try again."))
+
+   def about(self,widget,data=None):
+      self.about = gtk.AboutDialog()
+      self.about.set_name("Gmilk")
+      self.about.set_program_name("Gmilk")
+      self.about.set_version("0.0.1")
+      self.about.set_copyright("Eustaquio 'TaQ' Rangel")
+      self.about.set_license("GPL")
+      self.about.set_website("http://github.com/taq/gmilk")
+      self.about.set_website_label("http://github.com/taq/gmilk")
+      self.about.set_authors(["Eustaquio 'TaQ' Rangel <eustaquiorangel@gmail.com>"])
+      self.about.show()
 
 if __name__ == "__main__":
    gmilk = Gmilk()
