@@ -8,6 +8,7 @@ import gconf
 pygtk.require('2.0')
 
 from rtm import *
+from task import *
 
 gettext.bindtextdomain(APP, DIR)
 gettext.textdomain(APP)
@@ -23,6 +24,10 @@ class Gmilk:
 
       self.menu = gtk.Menu()
 
+      self.statusIcon.connect('popup-menu', self.popup_menu, self.menu)
+      self.statusIcon.set_visible(1)
+      self.init()
+
       self.menuItem = gtk.MenuItem(_("Authorize"))
       self.menuItem.connect('activate', self.authorize, self.statusIcon)
       self.menu.append(self.menuItem)
@@ -30,19 +35,32 @@ class Gmilk:
       self.menuItem = gtk.MenuItem(_("Quit"))
       self.menuItem.connect('activate', self.quit, self.statusIcon)
       self.menu.append(self.menuItem)
-
-      self.statusIcon.connect('popup-menu', self.popup_menu, self.menu)
-      self.statusIcon.set_visible(1)
-
-      self.gconf	= gconf.client_get_default()
-      self.frob	= self.gconf.get_string("/apps/gmilk/frob")
-      self.token	= self.gconf.get_string("/apps/gmilk/token")
-
-      self.init()
       gtk.main()
 
    def init(self):
+      self.gconf	= gconf.client_get_default()
+      self.frob	= self.gconf.get_string("/apps/gmilk/frob")
+      self.token	= self.gconf.get_string("/apps/gmilk/token")
       self.rtm = Rtm(self)
+
+      if self.rtm.check_token(self.token):
+         self.rtm.set_auth_token(self.token)
+         today_tasks = self.rtm.get_task_list("due:today")
+         self.add_today_tasks(today_tasks)
+
+   def add_today_tasks(self,tasks):
+      self.add_tasks(_("Today tasks"),tasks)
+
+   def add_tasks(self,title,tasks):
+      self.menuItem = gtk.MenuItem(title)
+      self.menu.append(self.menuItem)
+
+      for task in tasks:
+         self.menuItem = gtk.MenuItem(task.name)
+         self.menuItem.connect('activate', self.quit, self.statusIcon)
+         self.menu.append(self.menuItem)
+
+      self.menu.append(gtk.SeparatorMenuItem())
 
    def popup_menu(self, widget, button, time, data = None):
       if button == 3:

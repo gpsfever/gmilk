@@ -5,6 +5,8 @@ import urllib
 import hashlib 
 import xml.dom.minidom
 
+from task import *
+
 RTM_API_KEY = "a4ab81f86a5276cf2145f92c8f74a486"
 RTM_SHARED_SECRET = "7d068fd399131d9e"
 RTM_SERVICE_METHODS = "http://www.rememberthemilk.com/services/rest/"
@@ -34,7 +36,13 @@ class Rtm:
       rsp = self.get_response(url)
       return rsp.getElementsByTagName("token")[0].childNodes[0].data
 
+   def set_auth_token(self,token):
+      self.auth_token = token
+
    def check_token(self, token):
+      if len(token)<1:
+         return False
+
       args = {'method': 'rtm.auth.checkToken', 'auth_token': token}
       url = self.get_url(RTM_SERVICE_METHODS, args, False)
 
@@ -110,3 +118,17 @@ class Rtm:
       frob = self.get_frob()
       args = {'perms': perms}
       return (self.get_url(RTM_SERVICE_AUTH, args, False, frob), frob)
+
+   def get_task_list(self,filter=None):
+      args = {'method': 'rtm.tasks.getList'}    
+      if filter:
+         args['filter'] = filter
+      url = self.get_url(RTM_SERVICE_METHODS, args)
+      rsp = self.get_response(url)
+      tasks = []
+
+      for taskseries_node in rsp.getElementsByTagName("taskseries"):
+         id    = taskseries_node.getAttribute("id")
+         name  = taskseries_node.getAttribute("name")
+         tasks.append(Task(id,name))
+      return tasks
