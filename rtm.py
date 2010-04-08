@@ -40,7 +40,7 @@ class Rtm:
       self.auth_token = token
 
    def check_token(self, token):
-      if len(token)<1:
+      if token==None or len(token)<1:
          return False
 
       args = {'method': 'rtm.auth.checkToken', 'auth_token': token}

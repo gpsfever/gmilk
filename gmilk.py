@@ -52,29 +52,48 @@ class Gmilk:
 
       if self.rtm.check_token(self.token):
          self.rtm.set_auth_token(self.token)
-
-         today_tasks    = self.rtm.get_task_list("due:today")
-         tomorrow_tasks = self.rtm.get_task_list("due:tomorrow")
-         due_tasks      = self.rtm.get_task_list("dueBefore:today NOT completedBefore:today")
-
-         self.add_tasks(_("Today tasks"),today_tasks)
-         self.add_tasks(_("Tomorrow tasks"),tomorrow_tasks)
-         self.add_tasks(_("Due tasks"),due_tasks)
-
-         self.statusIcon.set_tooltip(_("%s tasks found.") % (len(today_tasks)+len(tomorrow_tasks)+len(due_tasks)))
-         self.blinking(True)
+         self.check_tasks()
       else:
-         self.menuItem = gtk.MenuItem(_("Authorize"))
-         self.menuItem.connect('activate', self.authorize, self.statusIcon)
-         self.menu.append(self.menuItem)
+         self.make_authorize_menuitem()
 
-      self.menuItem = gtk.MenuItem(_("About"))
-      self.menuItem.connect('activate', self.about, self.statusIcon)
-      self.menu.append(self.menuItem)
+   def clear_menu(self):
+      for menuitem in self.menu.get_children():
+         self.menu.remove(menuitem)
 
-      self.menuItem = gtk.MenuItem(_("Quit"))
-      self.menuItem.connect('activate', self.quit, self.statusIcon)
-      self.menu.append(self.menuItem)
+   def make_authorize_menuitem(self):
+      self.authorizeItem = gtk.authorizeItem(_("Authorize"))
+      self.authorizeItem.connect('activate', self.authorize, self.statusIcon)
+      self.menu.append(self.authorizeItem)
+      self.statusIcon.set_tooltip(_("Need to authorize. Click on 'Authorize' on the menu."))
+
+      self.make_about_menuitem()
+      self.make_quit_menuitem()
+
+   def make_about_menuitem(self):
+      self.aboutItem = gtk.MenuItem(_("About"))
+      self.aboutItem.connect('activate', self.about, self.statusIcon)
+      self.menu.append(self.aboutItem)
+
+   def make_quit_menuitem(self):
+      self.quitItem = gtk.MenuItem(_("Quit"))
+      self.quitItem.connect('activate', self.quit, self.statusIcon)
+      self.menu.append(self.quitItem)
+
+   def check_tasks(self):
+      today_tasks    = self.rtm.get_task_list("due:today")
+      tomorrow_tasks = self.rtm.get_task_list("due:tomorrow")
+      due_tasks      = self.rtm.get_task_list("dueBefore:today NOT completedBefore:today")
+
+      self.clear_menu()
+      self.add_tasks(_("Today tasks"),today_tasks)
+      self.add_tasks(_("Tomorrow tasks"),tomorrow_tasks)
+      self.add_tasks(_("Due tasks"),due_tasks)
+
+      self.statusIcon.set_tooltip(_("%s tasks found.") % (len(today_tasks)+len(tomorrow_tasks)+len(due_tasks)))
+      self.blinking(True)
+
+      self.make_about_menuitem()
+      self.make_quit_menuitem()
 
    def blinking(self,blink):
       self.statusIcon.set_blinking(blink)
