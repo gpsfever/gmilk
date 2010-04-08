@@ -45,11 +45,14 @@ class Gmilk:
 
       if self.rtm.check_token(self.token):
          self.rtm.set_auth_token(self.token)
-         today_tasks = self.rtm.get_task_list("due:today")
-         self.add_today_tasks(today_tasks)
 
-   def add_today_tasks(self,tasks):
-      self.add_tasks(_("Today tasks"),tasks)
+         today_tasks    = self.rtm.get_task_list("due:today")
+         tomorrow_tasks = self.rtm.get_task_list("due:tomorrow")
+         due_tasks      = self.rtm.get_task_list("dueBefore:today NOT completedBefore:today")
+
+         self.add_tasks(_("Today tasks"),today_tasks)
+         self.add_tasks(_("Tomorrow tasks"),tomorrow_tasks)
+         self.add_tasks(_("Due tasks"),due_tasks)
 
    def add_tasks(self,title,tasks):
       self.menuItem = gtk.MenuItem(title)
