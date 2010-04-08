@@ -1,7 +1,9 @@
 #!/usr/bin/python
+import threading
 import locale
 import gettext
 import gtk
+import gobject
 import pygtk
 import gconf
 
@@ -14,6 +16,16 @@ gettext.bindtextdomain(APP, DIR)
 gettext.textdomain(APP)
 _ = gettext.gettext
 
+gobject.threads_init()
+
+class InitThread(threading.Thread):
+   def __init__(self,gui):
+      super(InitThread,self).__init__()
+      self.gui = gui
+
+   def run(self):
+      self.gui.init()
+
 class Gmilk:
 
    def __init__(self):
@@ -25,12 +37,11 @@ class Gmilk:
       self.statusIcon.set_tooltip("Remember the milk")
       self.statusIcon.connect('activate'  , self.left_click , self.menu)
       self.statusIcon.connect('popup-menu', self.right_click, self.menu)
+      self.statusIcon.set_tooltip(_("Asking the task list to Remember the Milk ..."))
       self.statusIcon.set_visible(1)
 
-      self.menuItem = gtk.MenuItem(_("Asking the task list to Remember the Milk ..."));
-      self.menu.append(self.menuItem);
-
-      self.init()
+      t = InitThread(self)
+      t.start()
       gtk.main()
 
    def init(self):
@@ -38,8 +49,6 @@ class Gmilk:
       self.frob	= self.gconf.get_string("/apps/gmilk/frob")
       self.token	= self.gconf.get_string("/apps/gmilk/token")
       self.rtm = Rtm(self)
-
-      self.menu.remove(self.menuItem)
 
       if self.rtm.check_token(self.token):
          self.rtm.set_auth_token(self.token)
@@ -51,6 +60,9 @@ class Gmilk:
          self.add_tasks(_("Today tasks"),today_tasks)
          self.add_tasks(_("Tomorrow tasks"),tomorrow_tasks)
          self.add_tasks(_("Due tasks"),due_tasks)
+
+         self.statusIcon.set_tooltip(_("%s tasks found.") % (len(today_tasks)+len(tomorrow_tasks)+len(due_tasks)))
+         self.blinking(True)
       else:
          self.menuItem = gtk.MenuItem(_("Authorize"))
          self.menuItem.connect('activate', self.authorize, self.statusIcon)
@@ -59,6 +71,9 @@ class Gmilk:
       self.menuItem = gtk.MenuItem(_("Quit"))
       self.menuItem.connect('activate', self.quit, self.statusIcon)
       self.menu.append(self.menuItem)
+
+   def blinking(self,blink):
+      self.statusIcon.set_blinking(blink)
 
    def add_tasks(self,title,tasks):
       self.menuItem = gtk.MenuItem(title)
@@ -72,9 +87,11 @@ class Gmilk:
       self.menu.append(gtk.SeparatorMenuItem())
 
    def right_click(self, widget, button, time, data = None):
+      self.blinking(False)
       self.show_menu(widget,button,time,data)
 
    def left_click(self,widget,data):
+      self.blinking(False)
       self.show_menu(widget,0,gtk.get_current_event_time(),data)
 
    def show_menu(self,widget,button,time,data):
