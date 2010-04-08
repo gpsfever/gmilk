@@ -41,7 +41,7 @@ class Gmilk:
       self.menu = gtk.Menu()
 
       self.statusIcon = gtk.StatusIcon()
-      self.statusIcon.set_from_file("./images/rememberthemilk.png")
+      self.statusIcon.set_from_file("./images/empty.png")
       self.statusIcon.set_visible(True)
       self.statusIcon.set_tooltip("Remember the milk")
       self.statusIcon.connect('activate'  , self.left_click , self.menu)
@@ -104,12 +104,22 @@ class Gmilk:
       self.add_tasks(_("Today tasks"),today_tasks)
       self.add_tasks(_("Tomorrow tasks"),tomorrow_tasks)
       self.add_tasks(_("Due tasks"),due_tasks)
-
-      self.statusIcon.set_tooltip(_("%s tasks found.") % (len(today_tasks)+len(tomorrow_tasks)+len(due_tasks)))
-      self.blinking(True)
+      self.tasks_alert(len(today_tasks),len(tomorrow_tasks),len(due_tasks))
 
       self.make_about_menuitem()
       self.make_quit_menuitem()
+
+   def tasks_alert(self,today,tomorrow,due):
+      self.statusIcon.set_tooltip(_("%s tasks found.") % (today+tomorrow+due))
+      if due>0:
+         self.statusIcon.set_from_file("./images/due.png")
+      elif tomorrow>0:
+         self.statusIcon.set_from_file("./images/tomorrow.png")
+      elif today>0:
+         self.statusIcon.set_from_file("./images/today.png")
+      else:
+         self.statusIcon.set_from_file("./images/empty.png")
+      self.blinking(True)
 
    def blinking(self,blink):
       self.statusIcon.set_blinking(blink)
