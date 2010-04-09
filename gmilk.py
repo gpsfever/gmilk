@@ -2,7 +2,7 @@
 __appname__    = "Gmilk"
 __author__     = "Eustaquio 'TaQ' Rangel"
 __copyright__  = "2010 Eustaquio 'TaQ' Rangel"
-__version__    = "0.0.1"
+__version__    = "0.1.0"
 __license__    = "GPL"
 __email__      = "eustaquiorangel@gmail.com"
 __website__    = "http://github.com/taq/gmilk"
