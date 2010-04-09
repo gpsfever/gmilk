@@ -139,7 +139,7 @@ class Rtm:
       ctask = rsp.getElementsByTagName("task");
       return len(ctask)>0
 
-   def get_task_list(self,filter=None):
+   def get_task_list(self,type,filter=None):
       args = {'method': 'rtm.tasks.getList'}    
       if filter:
          args['filter'] = filter
@@ -155,5 +155,5 @@ class Rtm:
              id   = task[0].getAttribute("id")	if len(task)>0 else taskseries_node.getAttribute("id")
              due  = task[0].getAttribute("due") if len(task)>0 else taskseries_node.getAttribute("due")
              name = taskseries_node.getAttribute("name")
-             tasks.append(Task(id,name,due,list_id,sid))
+             tasks.append(Task(type,id,name,due,list_id,sid))
       return tasks

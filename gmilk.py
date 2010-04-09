@@ -65,13 +65,15 @@ class Gmilk:
       gtk.main()
 
    def init(self):
-      self.gconf		= gconf.client_get_default()
-      self.frob		= self.gconf.get_string("/apps/gmilk/frob")
-      self.token		= self.gconf.get_string("/apps/gmilk/token")
-      self.rtm			= Rtm(self)
-      self.last		= ""
-      self.timeline	= None
-      self.task_count= 0
+      self.gconf		      = gconf.client_get_default()
+      self.frob		      = self.gconf.get_string("/apps/gmilk/frob")
+      self.token		      = self.gconf.get_string("/apps/gmilk/token")
+      self.rtm			      = Rtm(self)
+      self.last		      = ""
+      self.timeline	      = None
+      self.today_count     = 0
+      self.tomorrow_count  = 0
+      self.due_count       = 0
 
       if self.rtm.check_token(self.token):
          self.rtm.set_auth_token(self.token)
@@ -121,10 +123,13 @@ class Gmilk:
       today_str      = today.strftime("%Y-%m-%d")
       tomorrow_str   = tomorrow.strftime("%Y-%m-%d")
 
-      today_tasks    = self.rtm.get_task_list("due:"+today_str+" NOT (completedBefore:"+today_str+" or completed:"+today_str+")")
-      tomorrow_tasks = self.rtm.get_task_list("due:"+tomorrow_str)
-      due_tasks      = self.rtm.get_task_list("dueBefore:"+today_str+" NOT (completedBefore:"+today_str+" or completed:"+today_str+")")
-      self.task_count= len(today_tasks)+len(tomorrow_tasks)+len(due_tasks)
+      today_tasks    = self.rtm.get_task_list(Task.TODAY,"due:"+today_str+" NOT (completedBefore:"+today_str+" or completed:"+today_str+")")
+      tomorrow_tasks = self.rtm.get_task_list(Task.TOMORROW,"due:"+tomorrow_str)
+      due_tasks      = self.rtm.get_task_list(Task.DUE,"dueBefore:"+today_str+" NOT (completedBefore:"+today_str+" or completed:"+today_str+")")
+
+      self.today_count     = len(today_tasks)
+      self.tomorrow_count  = len(tomorrow_tasks)
+      self.due_count       = len(due_tasks)
 
       self.clear_menu()
       self.add_tasks(_("No tasks today")    if len(today_tasks)<1    else _("Today tasks"),today_tasks,False)
@@ -133,32 +138,35 @@ class Gmilk:
 
       self.make_about_menuitem()
       self.make_quit_menuitem()
-      self.tasks_alert(len(today_tasks),len(tomorrow_tasks),len(due_tasks))
+      self.tasks_alert()
       gobject.timeout_add(1000*60*self.timeout,self.check_tasks)
 
    def notify(self,msg):
       noti = pynotify.Notification("Tasks alert",msg,os.getcwd()+"/images/today.png")
       noti.show()
 
-   def tasks_alert(self,today,tomorrow,due):
-      # no need to update message or icon if tasks count still the same
-      check = ("%s%s%s" % (today,tomorrow,due))
+   def make_check(self):
+      return ("%s%s%s" % (self.today_count,self.tomorrow_count,self.due_count))
+
+   def tasks_alert(self):
+      self.show_task_count()
+      # no need to update icon if tasks count still the same
+      check = self.make_check() 
       if self.last==check:
          return
-
-      self.show_task_count()
       self.last = check
 
-      if due>0:
+      if self.due_count>0:
          self.statusIcon.set_from_file("./images/due.png")
-      elif today>0:
+      elif self.today_count>0:
          self.statusIcon.set_from_file("./images/today.png")
-      elif tomorrow>0:
+      elif self.tomorrow_count>0:
          self.statusIcon.set_from_file("./images/tomorrow.png")
       else:
          self.statusIcon.set_from_file("./images/empty.png")
       self.blinking(True)
-      self.notify(_("%s tasks found." % (today+tomorrow+due)))
+      self.show_task_count()
+      self.notify(_("%s tasks found." % (self.today_count+self.tomorrow_count+self.due_count)))
 
    def blinking(self,blink):
       self.statusIcon.set_blinking(blink)
@@ -181,7 +189,7 @@ class Gmilk:
       self.menu.append(gtk.SeparatorMenuItem())
 
    def show_task_count(self):
-      self.set_tooltip(_("%d tasks found.") % self.task_count);
+      self.set_tooltip(_("%d tasks found.") % (self.today_count+self.tomorrow_count+self.due_count));
 
    def complete(self,widget,task=None):
       if task==None:
@@ -192,11 +200,21 @@ class Gmilk:
       if rsp==gtk.RESPONSE_NO:
          return
       self.set_tooltip(_("Marking '%s' task as complete ...") % task.name)
-      if self.rtm.complete_task(task,self.timeline):
-         show_info(_("Task '%s' marked as completed." % task.name))
-         self.menu.remove(widget)
-      else:
-         show_error(_("Could not mark task as complete."))
+      try:
+         if self.rtm.complete_task(task,self.timeline):
+            self.show_info(_("Task '%s' marked as completed." % task.name))
+            if task.type == Task.TODAY:
+               self.today_count -= 1
+            elif task.type == Task.TOMORROW:
+               self.tomorrow_count -= 1
+            else:
+               self.due_count -= 1
+            self.last = self.make_check()
+            self.menu.remove(widget)
+         else:
+            self.show_error(_("Could not mark task as complete."))
+      except:
+         self.show_error(_("There was an error marking task as complete."))
 
       self.show_task_count()
 
