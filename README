@@ -1,0 +1,16 @@
+Gmilk - GTK tray icon for Remember the Milk
+
+This is a Python app to list your today, tomorrow and due tasks with an icon on
+the tray bar. It uses GTK and should works on any GNU/Linux distro with GTK, Python
+and PyGTK installed.
+
+This product uses the Remember The Milk API but is not endorsed or certified by 
+Remember The Milk.
+This product does not store data other than the necessary to ask for authorization
+on the Remember the Milk website.
+This product does not use any kind of data othen than the necessary to ask for authorization
+and interact with your task list.
+This product does not collect any kind of data.
+This product does not request, collect, solicit, or otherwise obtain access to login names, 
+passwords or other authentication credentials for Remember The Milk other than by directing 
+users to Remember The Milk in the mechanism specifically provided by the Remember The Milk APIs.
