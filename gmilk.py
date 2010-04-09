@@ -117,9 +117,9 @@ class Gmilk:
       due_tasks      = self.rtm.get_task_list("dueBefore:"+today_str+" NOT (completedBefore:"+today_str+" or completed:"+today_str+")")
 
       self.clear_menu()
-      self.add_tasks(_("No tasks today")    if len(today_tasks)<1    else _("Today tasks"),today_tasks)
-      self.add_tasks(_("No tasks tomorrow") if len(tomorrow_tasks)<1 else _("Tomorrow tasks"),tomorrow_tasks)
-      self.add_tasks(_("No due tasks")      if len(due_tasks)<1      else _("Due tasks"),due_tasks)
+      self.add_tasks(_("No tasks today")    if len(today_tasks)<1    else _("Today tasks"),today_tasks,False)
+      self.add_tasks(_("No tasks tomorrow") if len(tomorrow_tasks)<1 else _("Tomorrow tasks"),tomorrow_tasks,False)
+      self.add_tasks(_("No due tasks")      if len(due_tasks)<1      else _("Due tasks"),due_tasks,True)
       self.tasks_alert(len(today_tasks),len(tomorrow_tasks),len(due_tasks))
 
       self.make_about_menuitem()
@@ -153,12 +153,18 @@ class Gmilk:
    def blinking(self,blink):
       self.statusIcon.set_blinking(blink)
 
-   def add_tasks(self,title,tasks):
+   def add_tasks(self,title,tasks,show_due):
       self.menuItem = gtk.MenuItem(title)
       self.menu.append(self.menuItem)
 
       for task in tasks:
-         self.menuItem = gtk.MenuItem("- "+task.name)
+         due = task.due
+         if show_due:
+				due = datetime.datetime.strptime(due, "%Y-%m-%dT%H:%M:%SZ")
+				due = due.strftime(_("%m/%d/%Y"))
+				self.menuItem = gtk.MenuItem(_("- %s due on %s") % (task.name,due))
+         else:
+				self.menuItem = gtk.MenuItem("- %s" % task.name)
          self.menu.append(self.menuItem)
 
       self.menu.append(gtk.SeparatorMenuItem())

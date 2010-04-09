@@ -128,7 +128,9 @@ class Rtm:
       tasks = []
 
       for taskseries_node in rsp.getElementsByTagName("taskseries"):
-         id    = taskseries_node.getAttribute("id")
+         task	= taskseries_node.getElementsByTagName("task")
+         id    = task[0].getAttribute("id")	if len(task)>0 else taskseries_node.getAttribute("id")
+         due   = task[0].getAttribute("due") if len(task)>0 else taskseries_node.getAttribute("due")
          name  = taskseries_node.getAttribute("name")
-         tasks.append(Task(id,name))
+         tasks.append(Task(id,name,due))
       return tasks
