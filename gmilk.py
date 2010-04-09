@@ -148,14 +148,7 @@ class Gmilk:
    def make_check(self):
       return ("%s%s%s" % (self.today_count,self.tomorrow_count,self.due_count))
 
-   def tasks_alert(self):
-      self.show_task_count()
-      # no need to update icon if tasks count still the same
-      check = self.make_check() 
-      if self.last==check:
-         return
-      self.last = check
-
+   def eval_icon(self):
       if self.due_count>0:
          self.statusIcon.set_from_file("./images/due.png")
       elif self.today_count>0:
@@ -164,8 +157,18 @@ class Gmilk:
          self.statusIcon.set_from_file("./images/tomorrow.png")
       else:
          self.statusIcon.set_from_file("./images/empty.png")
-      self.blinking(True)
+
+   def tasks_alert(self):
       self.show_task_count()
+      # no need to update icon if tasks count still the same
+      check = self.make_check() 
+      if self.last==check:
+         print "same id, returning"
+         return
+      self.last = check
+
+      self.eval_icon()
+      self.blinking(True)
       self.notify(_("%s tasks found." % (self.today_count+self.tomorrow_count+self.due_count)))
 
    def blinking(self,blink):
@@ -215,8 +218,8 @@ class Gmilk:
             self.show_error(_("Could not mark task as complete."))
       except:
          self.show_error(_("There was an error marking task as complete."))
-
       self.show_task_count()
+      self.eval_icon()
 
    def right_click(self, widget, button, time, data = None):
       self.blinking(False)
