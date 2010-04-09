@@ -39,6 +39,7 @@ class Gmilk:
 
    def __init__(self):
       self.menu = gtk.Menu()
+      self.timeout = 15
 
       self.statusIcon = gtk.StatusIcon()
       self.statusIcon.set_from_file("./images/empty.png")
@@ -49,7 +50,6 @@ class Gmilk:
       self.statusIcon.set_tooltip(_("Asking the task list to Remember the Milk ..."))
       self.statusIcon.set_visible(1)
 
-      gobject.timeout_add(1000*60*15,self.check_tasks)
       t = InitThread(self)
       t.start()
       gtk.main()
@@ -59,6 +59,7 @@ class Gmilk:
       self.frob   = self.gconf.get_string("/apps/gmilk/frob")
       self.token  = self.gconf.get_string("/apps/gmilk/token")
       self.rtm    = Rtm(self)
+      self.last   = ""
 
       if self.rtm.check_token(self.token):
          self.rtm.set_auth_token(self.token)
@@ -109,9 +110,17 @@ class Gmilk:
 
       self.make_about_menuitem()
       self.make_quit_menuitem()
+      gobject.timeout_add(1000*60*self.timeout,self.check_tasks)
 
    def tasks_alert(self,today,tomorrow,due):
       self.statusIcon.set_tooltip(_("%s tasks found.") % (today+tomorrow+due))
+
+      # no need to update message or icon if tasks count still the same
+      check = ("%s%s%s" % (today,tomorrow,due))
+      if self.last==check:
+         return
+      self.last = check
+
       if due>0:
          self.statusIcon.set_from_file("./images/due.png")
       elif today>0:
