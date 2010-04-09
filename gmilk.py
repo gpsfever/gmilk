@@ -274,7 +274,8 @@ class Gmilk:
       self.about.set_website(__website__)
       self.about.set_website_label(__website__)
       self.about.set_authors(["%s <%s>" % (__author__,__email__)])
-      self.about.show()
+      self.about.run()
+      self.about.destroy()
 
 if __name__ == "__main__":
    gmilk = Gmilk()
