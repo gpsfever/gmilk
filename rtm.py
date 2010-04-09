@@ -119,6 +119,26 @@ class Rtm:
       args = {'perms': perms}
       return (self.get_url(RTM_SERVICE_AUTH, args, False, frob), frob)
 
+   def create_timeline(self):
+      args  = {'method': 'rtm.timelines.create'}    
+      url   = self.get_url(RTM_SERVICE_METHODS, args)
+      rsp   = self.get_response(url)
+      time  = rsp.getElementsByTagName("timeline")
+      if len(time)<1:
+         return -1
+      return time[0].firstChild.data
+
+   def complete_task(self,task,timeline):
+      args  = {'method': 'rtm.tasks.complete'}    
+      args['timeline']        = timeline
+      args['list_id']         = task.list_id
+      args['taskseries_id']   = task.series_id
+      args['task_id']         = task.id
+      url   = self.get_url(RTM_SERVICE_METHODS, args)
+      rsp   = self.get_response(url)
+      ctask = rsp.getElementsByTagName("task");
+      return len(ctask)>0
+
    def get_task_list(self,filter=None):
       args = {'method': 'rtm.tasks.getList'}    
       if filter:
@@ -127,10 +147,13 @@ class Rtm:
       rsp = self.get_response(url)
       tasks = []
 
-      for taskseries_node in rsp.getElementsByTagName("taskseries"):
-         task	= taskseries_node.getElementsByTagName("task")
-         id    = task[0].getAttribute("id")	if len(task)>0 else taskseries_node.getAttribute("id")
-         due   = task[0].getAttribute("due") if len(task)>0 else taskseries_node.getAttribute("due")
-         name  = taskseries_node.getAttribute("name")
-         tasks.append(Task(id,name,due))
+      for list_node in rsp.getElementsByTagName("list"):
+          list_id = list_node.getAttribute("id")
+          for taskseries_node in list_node.getElementsByTagName("taskseries"):
+             sid  = taskseries_node.getAttribute("id")
+             task = taskseries_node.getElementsByTagName("task")
+             id   = task[0].getAttribute("id")	if len(task)>0 else taskseries_node.getAttribute("id")
+             due  = task[0].getAttribute("due") if len(task)>0 else taskseries_node.getAttribute("due")
+             name = taskseries_node.getAttribute("name")
+             tasks.append(Task(id,name,due,list_id,sid))
       return tasks

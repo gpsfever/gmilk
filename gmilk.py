@@ -52,11 +52,11 @@ class Gmilk:
       self.statusIcon = gtk.StatusIcon()
       self.statusIcon.set_from_file("./images/empty.png")
       self.statusIcon.set_visible(True)
-      self.statusIcon.set_tooltip("Remember the milk")
       self.statusIcon.connect('activate'  , self.left_click , self.menu)
       self.statusIcon.connect('popup-menu', self.right_click, self.menu)
-      self.statusIcon.set_tooltip(_("Asking the task list to Remember the Milk ..."))
       self.statusIcon.set_visible(1)
+
+      self.set_tooltip(_("Asking the task list to Remember the Milk ..."))
       if notify>0:
          pynotify.init("Gmilk")
 
@@ -65,17 +65,22 @@ class Gmilk:
       gtk.main()
 
    def init(self):
-      self.gconf  = gconf.client_get_default()
-      self.frob   = self.gconf.get_string("/apps/gmilk/frob")
-      self.token  = self.gconf.get_string("/apps/gmilk/token")
-      self.rtm    = Rtm(self)
-      self.last   = ""
+      self.gconf		= gconf.client_get_default()
+      self.frob		= self.gconf.get_string("/apps/gmilk/frob")
+      self.token		= self.gconf.get_string("/apps/gmilk/token")
+      self.rtm			= Rtm(self)
+      self.last		= ""
+      self.timeline	= None
+      self.task_count= 0
 
       if self.rtm.check_token(self.token):
          self.rtm.set_auth_token(self.token)
          self.check_tasks()
       else:
          self.make_authorize_menuitem()
+
+   def set_tooltip(self,text):
+      self.statusIcon.set_tooltip(text)
 
    def clear_menu(self):
       for menuitem in self.menu.get_children():
@@ -85,7 +90,7 @@ class Gmilk:
       self.authorizeItem = gtk.MenuItem(_("Authorize"))
       self.authorizeItem.connect('activate', self.authorize, self.statusIcon)
       self.menu.append(self.authorizeItem)
-      self.statusIcon.set_tooltip(_("Need to authorize. Click on 'Authorize' on the menu."))
+      self.set_tooltip(_("Need to authorize. Click on 'Authorize' on the menu."))
       self.blinking(True)
 
       self.make_about_menuitem()
@@ -106,24 +111,29 @@ class Gmilk:
       self.menu.append(self.quitItem)
 
    def check_tasks(self):
-      self.statusIcon.set_tooltip(_("Checking your tasks ..."))
+      if(self.timeline==None):
+         self.set_tooltip(_("Creating a timeline ..."))
+         self.timeline = self.rtm.create_timeline()
+      self.set_tooltip(_("Checking your tasks ..."))
+
       today          = datetime.date.today()
       tomorrow       = today + datetime.timedelta(days=1)
       today_str      = today.strftime("%Y-%m-%d")
       tomorrow_str   = tomorrow.strftime("%Y-%m-%d")
 
-      today_tasks    = self.rtm.get_task_list("due:"+today_str)
+      today_tasks    = self.rtm.get_task_list("due:"+today_str+" NOT (completedBefore:"+today_str+" or completed:"+today_str+")")
       tomorrow_tasks = self.rtm.get_task_list("due:"+tomorrow_str)
       due_tasks      = self.rtm.get_task_list("dueBefore:"+today_str+" NOT (completedBefore:"+today_str+" or completed:"+today_str+")")
+      self.task_count= len(today_tasks)+len(tomorrow_tasks)+len(due_tasks)
 
       self.clear_menu()
       self.add_tasks(_("No tasks today")    if len(today_tasks)<1    else _("Today tasks"),today_tasks,False)
       self.add_tasks(_("No tasks tomorrow") if len(tomorrow_tasks)<1 else _("Tomorrow tasks"),tomorrow_tasks,False)
       self.add_tasks(_("No due tasks")      if len(due_tasks)<1      else _("Due tasks"),due_tasks,True)
-      self.tasks_alert(len(today_tasks),len(tomorrow_tasks),len(due_tasks))
 
       self.make_about_menuitem()
       self.make_quit_menuitem()
+      self.tasks_alert(len(today_tasks),len(tomorrow_tasks),len(due_tasks))
       gobject.timeout_add(1000*60*self.timeout,self.check_tasks)
 
    def notify(self,msg):
@@ -131,12 +141,12 @@ class Gmilk:
       noti.show()
 
    def tasks_alert(self,today,tomorrow,due):
-      self.statusIcon.set_tooltip(_("%s tasks found.") % (today+tomorrow+due))
-
       # no need to update message or icon if tasks count still the same
       check = ("%s%s%s" % (today,tomorrow,due))
       if self.last==check:
          return
+
+      self.show_task_count()
       self.last = check
 
       if due>0:
@@ -165,9 +175,30 @@ class Gmilk:
 				self.menuItem = gtk.MenuItem(_("- %s due on %s") % (task.name,due))
          else:
 				self.menuItem = gtk.MenuItem("- %s" % task.name)
+         self.menuItem.connect('activate', self.complete, task)
          self.menu.append(self.menuItem)
 
       self.menu.append(gtk.SeparatorMenuItem())
+
+   def show_task_count(self):
+      self.set_tooltip(_("%d tasks found.") % self.task_count);
+
+   def complete(self,widget,task=None):
+      if task==None:
+         return
+      dialog = gtk.MessageDialog(None,gtk.DIALOG_MODAL,gtk.MESSAGE_QUESTION,gtk.BUTTONS_YES_NO,(_("Are you sure you want to mark task '%s' as completed?") % task.name))
+      rsp = dialog.run()
+      dialog.destroy()
+      if rsp==gtk.RESPONSE_NO:
+         return
+      self.set_tooltip(_("Marking '%s' task as complete ...") % task.name)
+      if self.rtm.complete_task(task,self.timeline):
+         show_info(_("Task '%s' marked as completed." % task.name))
+         self.menu.remove(widget)
+      else:
+         show_error(_("Could not mark task as complete."))
+
+      self.show_task_count()
 
    def right_click(self, widget, button, time, data = None):
       self.blinking(False)
