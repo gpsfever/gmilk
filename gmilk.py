@@ -162,7 +162,7 @@ class Gmilk:
       dialog.destroy()
 
    def authorize(self,widget,data=None):
-      (url,frob) = self.rtm.auth_url("delete")
+      (url,frob) = self.rtm.auth_url("write")
 
       self.gconf.set_string("/apps/gmilk/frob",frob)
 
