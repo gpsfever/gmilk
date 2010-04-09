@@ -15,6 +15,7 @@ import gtk
 import gobject
 import pygtk
 import gconf
+import datetime
 
 pygtk.require('2.0')
 
@@ -97,10 +98,14 @@ class Gmilk:
 
    def check_tasks(self):
       self.statusIcon.set_tooltip(_("Checking your tasks ..."))
+      today          = datetime.date.today()
+      tomorrow       = today + datetime.timedelta(days=1)
+      today_str      = today.strftime("%Y-%m-%d")
+      tomorrow_str   = tomorrow.strftime("%Y-%m-%d")
 
-      today_tasks    = self.rtm.get_task_list("due:today")
-      tomorrow_tasks = self.rtm.get_task_list("due:tomorrow")
-      due_tasks      = self.rtm.get_task_list("dueBefore:today NOT (completedBefore:today or completed:today)")
+      today_tasks    = self.rtm.get_task_list("due:"+today_str)
+      tomorrow_tasks = self.rtm.get_task_list("due:"+tomorrow_str)
+      due_tasks      = self.rtm.get_task_list("dueBefore:"+today_str+" NOT (completedBefore:"+today_str+" or completed:"+today_str+")")
 
       self.clear_menu()
       self.add_tasks(_("No tasks today")    if len(today_tasks)<1    else _("Today tasks"),today_tasks)
