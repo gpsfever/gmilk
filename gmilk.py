@@ -49,6 +49,7 @@ class Gmilk:
       self.statusIcon.set_tooltip(_("Asking the task list to Remember the Milk ..."))
       self.statusIcon.set_visible(1)
 
+      gobject.timeout_add(1000*60*15,self.check_tasks)
       t = InitThread(self)
       t.start()
       gtk.main()
@@ -130,7 +131,6 @@ class Gmilk:
 
       for task in tasks:
          self.menuItem = gtk.MenuItem("- "+task.name)
-         self.menuItem.connect('activate', self.quit, self.statusIcon)
          self.menu.append(self.menuItem)
 
       self.menu.append(gtk.SeparatorMenuItem())
