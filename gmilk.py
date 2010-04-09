@@ -8,6 +8,7 @@ __email__      = "eustaquiorangel@gmail.com"
 __website__    = "http://github.com/taq/gmilk"
 __date__       = "$Date: 2010/04/08 12:00:00$"
 
+import os
 import threading
 import locale
 import gettext
@@ -126,7 +127,7 @@ class Gmilk:
       gobject.timeout_add(1000*60*self.timeout,self.check_tasks)
 
    def notify(self,msg):
-      noti = pynotify.Notification("Tasks alert",msg,"./images/today.png")
+      noti = pynotify.Notification("Tasks alert",msg,os.getcwd()+"/images/today.png")
       noti.show()
 
    def tasks_alert(self,today,tomorrow,due):
