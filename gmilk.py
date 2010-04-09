@@ -22,6 +22,12 @@ pygtk.require('2.0')
 from rtm import *
 from task import *
 
+try:
+   import pynotify
+   notify = 1
+except:
+   notify = 0
+
 gettext.bindtextdomain(APP, DIR)
 gettext.textdomain(APP)
 _ = gettext.gettext
@@ -50,6 +56,8 @@ class Gmilk:
       self.statusIcon.connect('popup-menu', self.right_click, self.menu)
       self.statusIcon.set_tooltip(_("Asking the task list to Remember the Milk ..."))
       self.statusIcon.set_visible(1)
+      if notify>0:
+         pynotify.init("Gmilk")
 
       t = InitThread(self)
       t.start()
@@ -117,6 +125,10 @@ class Gmilk:
       self.make_quit_menuitem()
       gobject.timeout_add(1000*60*self.timeout,self.check_tasks)
 
+   def notify(self,msg):
+      noti = pynotify.Notification("Tasks alert",msg,"./images/today.png")
+      noti.show()
+
    def tasks_alert(self,today,tomorrow,due):
       self.statusIcon.set_tooltip(_("%s tasks found.") % (today+tomorrow+due))
 
@@ -135,6 +147,7 @@ class Gmilk:
       else:
          self.statusIcon.set_from_file("./images/empty.png")
       self.blinking(True)
+      self.notify(_("%s tasks found." % (today+tomorrow+due)))
 
    def blinking(self,blink):
       self.statusIcon.set_blinking(blink)
