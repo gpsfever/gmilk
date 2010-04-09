@@ -113,10 +113,10 @@ class Gmilk:
       self.statusIcon.set_tooltip(_("%s tasks found.") % (today+tomorrow+due))
       if due>0:
          self.statusIcon.set_from_file("./images/due.png")
-      elif tomorrow>0:
-         self.statusIcon.set_from_file("./images/tomorrow.png")
       elif today>0:
          self.statusIcon.set_from_file("./images/today.png")
+      elif tomorrow>0:
+         self.statusIcon.set_from_file("./images/tomorrow.png")
       else:
          self.statusIcon.set_from_file("./images/empty.png")
       self.blinking(True)
