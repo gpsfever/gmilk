@@ -29,6 +29,9 @@ try:
 except:
    notify = 0
 
+BASE_DIRS = [os.path.join(os.path.expanduser("~"), ".local", "share"),"/usr/local/share", "/usr/share"]
+DATA_DIRS = [os.path.abspath(sys.path[0])] + [os.path.join(d,__appname__.lower()) for d in BASE_DIRS]
+
 gettext.bindtextdomain(APP, DIR)
 gettext.textdomain(APP)
 _ = gettext.gettext
@@ -50,7 +53,7 @@ class Gmilk:
       self.timeout = 15
 
       self.statusIcon = gtk.StatusIcon()
-      self.statusIcon.set_from_file("./images/empty.png")
+      self.statusIcon.set_from_file(self.get_icon("empty.png"))
       self.statusIcon.set_visible(True)
       self.statusIcon.connect('activate'  , self.left_click , self.menu)
       self.statusIcon.connect('popup-menu', self.right_click, self.menu)
@@ -148,15 +151,22 @@ class Gmilk:
    def make_check(self):
       return ("%s%s%s" % (self.today_count,self.tomorrow_count,self.due_count))
 
+   def get_icon(self,icon):
+      for base in DATA_DIRS:
+         path = os.path.join(base,"images",icon)
+         if os.path.exists(path):
+            return path
+      return None         
+
    def eval_icon(self):
       if self.due_count>0:
-         self.statusIcon.set_from_file("./images/due.png")
+         self.statusIcon.set_from_file(self.get_icon("due.png"))
       elif self.today_count>0:
-         self.statusIcon.set_from_file("./images/today.png")
+         self.statusIcon.set_from_file(self.get_icon("today.png"))
       elif self.tomorrow_count>0:
-         self.statusIcon.set_from_file("./images/tomorrow.png")
+         self.statusIcon.set_from_file(self.get_icon("tomorrow.png"))
       else:
-         self.statusIcon.set_from_file("./images/empty.png")
+         self.statusIcon.set_from_file(self.get_icon("empty.png"))
 
    def tasks_alert(self):
       self.show_task_count()
