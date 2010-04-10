@@ -142,7 +142,7 @@ class Gmilk:
       gobject.timeout_add(1000*60*self.timeout,self.check_tasks)
 
    def notify(self,msg):
-      noti = pynotify.Notification("Tasks alert",msg,os.getcwd()+"/images/today.png")
+      noti = pynotify.Notification(_("Tasks alert"),msg,os.getcwd()+"/images/today.png")
       noti.show()
 
    def make_check(self):
@@ -169,7 +169,7 @@ class Gmilk:
 
       self.eval_icon()
       self.blinking(True)
-      self.notify(_("%s tasks found." % (self.today_count+self.tomorrow_count+self.due_count)))
+      self.notify(_("%s tasks found.") % (self.today_count+self.tomorrow_count+self.due_count))
 
    def blinking(self,blink):
       self.statusIcon.set_blinking(blink)
@@ -181,11 +181,11 @@ class Gmilk:
       for task in tasks:
          due = task.due
          if show_due:
-				due = datetime.datetime.strptime(due, "%Y-%m-%dT%H:%M:%SZ")
-				due = due.strftime(_("%m/%d/%Y"))
-				self.menuItem = gtk.MenuItem(_("- %s due on %s") % (task.name,due))
+            due = datetime.datetime.strptime(due, "%Y-%m-%dT%H:%M:%SZ")
+            due = due.strftime(_("%m/%d/%Y"))
+            self.menuItem = gtk.MenuItem(_("- %(title)s due on %(date)s") % {'title':task.name,'date':due})
          else:
-				self.menuItem = gtk.MenuItem("- %s" % task.name)
+            self.menuItem = gtk.MenuItem("- %s" % task.name)
          self.menuItem.connect('activate', self.complete, task)
          self.menu.append(self.menuItem)
 
@@ -205,7 +205,7 @@ class Gmilk:
       self.set_tooltip(_("Marking '%s' task as complete ...") % task.name)
       try:
          if self.rtm.complete_task(task,self.timeline):
-            self.show_info(_("Task '%s' marked as completed." % task.name))
+            self.show_info(_("Task '%s' marked as completed.") % task.name)
             if task.type == Task.TODAY:
                self.today_count -= 1
             elif task.type == Task.TOMORROW:

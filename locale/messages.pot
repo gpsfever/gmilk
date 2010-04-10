@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-03-19 15:15-0300\n"
+"POT-Creation-Date: 2010-04-09 23:47-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,22 +16,124 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: gmilk.py:25
+#: gmilk.py:59
+msgid "Asking the task list to Remember the Milk ..."
+msgstr ""
+
+#: gmilk.py:92
 msgid "Authorize"
 msgstr ""
 
-#: gmilk.py:29
+#: gmilk.py:95
+msgid "Need to authorize. Click on 'Authorize' on the menu."
+msgstr ""
+
+#: gmilk.py:106
+msgid "About"
+msgstr ""
+
+#: gmilk.py:111
 msgid "Quit"
 msgstr ""
 
-#: gmilk.py:54
+#: gmilk.py:117
+msgid "Creating a timeline ..."
+msgstr ""
+
+#: gmilk.py:119
+msgid "Checking your tasks ..."
+msgstr ""
+
+#: gmilk.py:135
+msgid "No tasks today"
+msgstr ""
+
+#: gmilk.py:135
+msgid "Today tasks"
+msgstr ""
+
+#: gmilk.py:136
+msgid "No tasks tomorrow"
+msgstr ""
+
+#: gmilk.py:136
+msgid "Tomorrow tasks"
+msgstr ""
+
+#: gmilk.py:137
+msgid "No due tasks"
+msgstr ""
+
+#: gmilk.py:137
+msgid "Due tasks"
+msgstr ""
+
+#: gmilk.py:145
+msgid "Tasks alert"
+msgstr ""
+
+#: gmilk.py:172
+#, python-format
+msgid "%s tasks found."
+msgstr ""
+
+#: gmilk.py:185
+msgid "%m/%d/%Y"
+msgstr ""
+
+#: gmilk.py:186
+#, python-format
+msgid "- %(title)s due on %(date)s"
+msgstr ""
+
+#: gmilk.py:195
+#, python-format
+msgid "%d tasks found."
+msgstr ""
+
+#: gmilk.py:200
+#, python-format
+msgid "Are you sure you want to mark task '%s' as completed?"
+msgstr ""
+
+#: gmilk.py:205
+#, python-format
+msgid "Marking '%s' task as complete ..."
+msgstr ""
+
+#: gmilk.py:208
+#, python-format
+msgid "Task '%s' marked as completed."
+msgstr ""
+
+#: gmilk.py:218
+msgid "Could not mark task as complete."
+msgstr ""
+
+#: gmilk.py:220
+msgid "There was an error marking task as complete."
+msgstr ""
+
+#: gmilk.py:255
+msgid "Please enter the following URL on your browser"
+msgstr ""
+
+#: gmilk.py:257
 msgid "Asking authorization"
 msgstr ""
 
-#: gmilk.py:54
-msgid "Ask"
+#: gmilk.py:270
+msgid "You need authorization to use this app"
 msgstr ""
 
-#: gmilk.py:54
-msgid "Cancel"
+#: gmilk.py:276
+msgid "Did you give authorization to this app? Please try again."
+msgstr ""
+
+#: gmilk.py:282
+msgid "Authorized! You should now be able to use this app now."
+msgstr ""
+
+#: gmilk.py:286
+msgid "Invalid authorization, please try again."
 msgstr ""
