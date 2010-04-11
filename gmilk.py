@@ -32,8 +32,8 @@ except:
 BASE_DIRS = [os.path.join(os.path.expanduser("~"), ".local", "share"),"/usr/local/share", "/usr/share"]
 DATA_DIRS = [os.path.abspath(sys.path[0])] + [os.path.join(d,__appname__.lower()) for d in BASE_DIRS]
 
-gettext.bindtextdomain(APP, DIR)
-gettext.textdomain(APP)
+gettext.bindtextdomain(__appname__.lower())
+gettext.textdomain(__appname__.lower())
 _ = gettext.gettext
 
 gobject.threads_init()
