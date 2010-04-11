@@ -77,6 +77,8 @@ class Gmilk:
       self.today_count     = 0
       self.tomorrow_count  = 0
       self.due_count       = 0
+      self.aboutItem       = None
+      self.quitItem        = None
 
       if self.rtm.check_token(self.token):
          self.rtm.set_auth_token(self.token)
@@ -106,11 +108,15 @@ class Gmilk:
          self.menu.remove(self.authorizeItem)
 
    def make_about_menuitem(self):
+      if self.aboutItem!=None:
+         return self.aboutItem
       self.aboutItem = gtk.MenuItem(_("About"))
       self.aboutItem.connect('activate', self.about, self.statusIcon)
       self.menu.append(self.aboutItem)
 
    def make_quit_menuitem(self):
+      if self.quitItem!=None:
+         return self.quitItem
       self.quitItem = gtk.MenuItem(_("Quit"))
       self.quitItem.connect('activate', self.quit, self.statusIcon)
       self.menu.append(self.quitItem)
@@ -139,9 +145,9 @@ class Gmilk:
       self.add_tasks(_("No tasks tomorrow") if len(tomorrow_tasks)<1 else _("Tomorrow tasks"),tomorrow_tasks,False)
       self.add_tasks(_("No due tasks")      if len(due_tasks)<1      else _("Due tasks"),due_tasks,True)
 
+      self.tasks_alert()
       self.make_about_menuitem()
       self.make_quit_menuitem()
-      self.tasks_alert()
       gobject.timeout_add(1000*60*self.timeout,self.check_tasks)
 
    def notify(self,msg):
