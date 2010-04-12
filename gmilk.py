@@ -149,7 +149,7 @@ class Gmilk:
       gobject.timeout_add(1000*60*self.timeout,self.check_tasks)
 
    def notify(self,msg):
-      noti = pynotify.Notification(_("Tasks alert"),msg,os.getcwd()+"/images/today.png")
+      noti = pynotify.Notification(_("Tasks alert"),msg,self.get_icon("today.png"))
       noti.show()
 
    def make_check(self):

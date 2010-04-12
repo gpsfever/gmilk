@@ -7,7 +7,7 @@ import xml.dom.minidom
 
 from task import *
 
-RTM_API_KEY = "a4ab81f86a5276cf2145f92c8f74a486"
+RTM_API_KEY = "a4ab81f86a5276cf2145f92c8f74a486" # you can get yours at http://www.rememberthemilk.com/services/api/keys.rtm
 RTM_SHARED_SECRET = "7d068fd399131d9e"
 RTM_SERVICE_METHODS = "http://api.rememberthemilk.com/services/rest/"
 RTM_SERVICE_AUTH = "http://www.rememberthemilk.com/services/auth/"
