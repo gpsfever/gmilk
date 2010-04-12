@@ -50,7 +50,7 @@ class Gmilk:
 
    def __init__(self):
       self.menu = gtk.Menu()
-      self.timeout = 2
+      self.timeout = 15
 
       self.statusIcon = gtk.StatusIcon()
       self.statusIcon.set_from_file(self.get_icon("empty.png"))
