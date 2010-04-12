@@ -2,11 +2,11 @@
 __appname__    = "Gmilk"
 __author__     = "Eustaquio 'TaQ' Rangel"
 __copyright__  = "2010 Eustaquio 'TaQ' Rangel"
-__version__    = "0.1.0"
+__version__    = "0.1.1"
 __license__    = "GPL"
 __email__      = "eustaquiorangel@gmail.com"
 __website__    = "http://github.com/taq/gmilk"
-__date__       = "$Date: 2010/04/08 12:00:00$"
+__date__       = "$Date: 2010/04/12 12:00:00$"
 
 import os
 import threading
