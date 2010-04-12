@@ -50,7 +50,7 @@ class Gmilk:
 
    def __init__(self):
       self.menu = gtk.Menu()
-      self.timeout = 15
+      self.timeout = 2
 
       self.statusIcon = gtk.StatusIcon()
       self.statusIcon.set_from_file(self.get_icon("empty.png"))
@@ -108,17 +108,15 @@ class Gmilk:
          self.menu.remove(self.authorizeItem)
 
    def make_about_menuitem(self):
-      if self.aboutItem!=None:
-         return self.aboutItem
-      self.aboutItem = gtk.MenuItem(_("About"))
-      self.aboutItem.connect('activate', self.about, self.statusIcon)
+      if self.aboutItem==None:
+         self.aboutItem = gtk.MenuItem(_("About"))
+         self.aboutItem.connect('activate', self.about, self.statusIcon)
       self.menu.append(self.aboutItem)
 
    def make_quit_menuitem(self):
-      if self.quitItem!=None:
-         return self.quitItem
-      self.quitItem = gtk.MenuItem(_("Quit"))
-      self.quitItem.connect('activate', self.quit, self.statusIcon)
+      if self.quitItem==None:
+         self.quitItem = gtk.MenuItem(_("Quit"))
+         self.quitItem.connect('activate', self.quit, self.statusIcon)
       self.menu.append(self.quitItem)
 
    def check_tasks(self):
