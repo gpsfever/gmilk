@@ -191,6 +191,16 @@ class Gmilk:
    def task_count(self):
       return self.today_count+self.tomorrow_count+self.due_count
 
+   def find_task_by_id(self,id):
+      try:
+         all = self.today_tasks+self.tomorrow_tasks+self.due_tasks
+         for task in all:
+            if task.id==id:
+               return task
+      except:
+         pass
+      return None
+
    def get_task(self,pos):
       try:
          all  = self.today_tasks+self.tomorrow_tasks+self.due_tasks
@@ -228,6 +238,7 @@ class Gmilk:
             self.menuItem = gtk.MenuItem("- %s" % task.name)
          self.menuItem.connect('activate', self.complete, task)
          self.menu.append(self.menuItem)
+         task.menu_item = self.menuItem
 
       self.menu.append(gtk.SeparatorMenuItem())
 
@@ -253,13 +264,16 @@ class Gmilk:
             else:
                self.due_count -= 1
             self.last = self.make_check()
-            self.menu.remove(widget)
+            if task.menu_item!=None:
+               self.menu.remove(task.menu_item)
          else:
             self.show_error(_("Could not mark task as complete."))
       except:
          self.show_error(_("There was an error marking task as complete."))
+         return False
       self.show_task_count()
       self.eval_icon()
+      return True
 
    def right_click(self, widget, button, time, data = None):
       self.blinking(False)
