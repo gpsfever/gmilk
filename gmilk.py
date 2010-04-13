@@ -153,7 +153,6 @@ class Gmilk:
       self.today_count     = len(self.today_tasks)
       self.tomorrow_count  = len(self.tomorrow_tasks)
       self.due_count       = len(self.due_tasks)
-      print "conta:",self.task_count()
 
       self.clear_menu()
       self.add_tasks(_("No tasks today")    if len(self.today_tasks)<1    else _("Today tasks")   ,self.today_tasks,False)
@@ -190,7 +189,6 @@ class Gmilk:
          self.statusIcon.set_from_file(self.get_icon("empty.png"))
 
    def task_count(self):
-      print "count:",self.today_count+self.tomorrow_count+self.due_count
       return self.today_count+self.tomorrow_count+self.due_count
 
    def tasks_alert(self):
@@ -203,7 +201,7 @@ class Gmilk:
 
       self.eval_icon()
       self.blinking(True)
-      self.notify(_("%s tasks found.") % (self.today_count+self.tomorrow_count+self.due_count))
+      self.notify(_("%s tasks found.") % self.task_count())
 
    def blinking(self,blink):
       self.statusIcon.set_blinking(blink)
@@ -226,7 +224,7 @@ class Gmilk:
       self.menu.append(gtk.SeparatorMenuItem())
 
    def show_task_count(self):
-      self.set_tooltip(_("%d tasks found.") % (self.today_count+self.tomorrow_count+self.due_count));
+      self.set_tooltip(_("%d tasks found.") % self.task_count())
 
    def complete(self,widget,task=None):
       if task==None:
