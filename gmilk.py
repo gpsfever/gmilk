@@ -29,6 +29,12 @@ try:
 except:
    notify = 0
 
+try:
+   from dbus_server import *
+   dbus_enabled = 1
+except:
+   dbus_enabled = 0
+
 BASE_DIRS = [os.path.join(os.path.expanduser("~"), ".local", "share"),"/usr/local/share", "/usr/share"]
 DATA_DIRS = [os.path.abspath(sys.path[0])] + [os.path.join(d,__appname__.lower()) for d in BASE_DIRS]
 
@@ -65,6 +71,13 @@ class Gmilk:
 
       t = InitThread(self)
       t.start()
+
+      if dbus_enabled>0:
+         bus      = dbus.SessionBus()
+         bus_name = dbus.service.BusName('com.Gmilk',bus=bus)
+         bus_obj  = DbusServer(bus_name,'/')
+         bus_obj.set_manager(self)
+
       gtk.main()
 
    def init(self):
@@ -79,6 +92,9 @@ class Gmilk:
       self.due_count       = 0
       self.aboutItem       = None
       self.quitItem        = None
+      self.today_tasks     = []
+      self.tomorrow_tasks  = []
+      self.due_tasks       = []
 
       if self.rtm.check_token(self.token):
          self.rtm.set_auth_token(self.token)
@@ -130,18 +146,19 @@ class Gmilk:
       today_str      = today.strftime("%Y-%m-%d")
       tomorrow_str   = tomorrow.strftime("%Y-%m-%d")
 
-      today_tasks    = self.rtm.get_task_list(Task.TODAY,"due:"+today_str+" NOT (completedBefore:"+today_str+" or completed:"+today_str+")")
-      tomorrow_tasks = self.rtm.get_task_list(Task.TOMORROW,"due:"+tomorrow_str)
-      due_tasks      = self.rtm.get_task_list(Task.DUE,"dueBefore:"+today_str+" NOT (completedBefore:"+today_str+" or completed:"+today_str+")")
+      self.today_tasks    = self.rtm.get_task_list(Task.TODAY,"due:"+today_str+" NOT (completedBefore:"+today_str+" or completed:"+today_str+")")
+      self.tomorrow_tasks = self.rtm.get_task_list(Task.TOMORROW,"due:"+tomorrow_str)
+      self.due_tasks      = self.rtm.get_task_list(Task.DUE,"dueBefore:"+today_str+" NOT (completedBefore:"+today_str+" or completed:"+today_str+")")
 
-      self.today_count     = len(today_tasks)
-      self.tomorrow_count  = len(tomorrow_tasks)
-      self.due_count       = len(due_tasks)
+      self.today_count     = len(self.today_tasks)
+      self.tomorrow_count  = len(self.tomorrow_tasks)
+      self.due_count       = len(self.due_tasks)
+      print "conta:",self.task_count()
 
       self.clear_menu()
-      self.add_tasks(_("No tasks today")    if len(today_tasks)<1    else _("Today tasks"),today_tasks,False)
-      self.add_tasks(_("No tasks tomorrow") if len(tomorrow_tasks)<1 else _("Tomorrow tasks"),tomorrow_tasks,False)
-      self.add_tasks(_("No due tasks")      if len(due_tasks)<1      else _("Due tasks"),due_tasks,True)
+      self.add_tasks(_("No tasks today")    if len(self.today_tasks)<1    else _("Today tasks")   ,self.today_tasks,False)
+      self.add_tasks(_("No tasks tomorrow") if len(self.tomorrow_tasks)<1 else _("Tomorrow tasks"),self.tomorrow_tasks,False)
+      self.add_tasks(_("No due tasks")      if len(self.due_tasks)<1      else _("Due tasks")     ,self.due_tasks,True)
 
       self.tasks_alert()
       self.make_about_menuitem()
@@ -172,12 +189,15 @@ class Gmilk:
       else:
          self.statusIcon.set_from_file(self.get_icon("empty.png"))
 
+   def task_count(self):
+      print "count:",self.today_count+self.tomorrow_count+self.due_count
+      return self.today_count+self.tomorrow_count+self.due_count
+
    def tasks_alert(self):
       self.show_task_count()
       # no need to update icon if tasks count still the same
       check = self.make_check() 
       if self.last==check:
-         print "same id, returning"
          return
       self.last = check
 
