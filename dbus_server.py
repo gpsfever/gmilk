@@ -7,3 +7,7 @@ class DbusServer(dbus.service.Object):
    @dbus.service.method(dbus_interface="com.Gmilk.Interface",in_signature="",out_signature="i")
    def task_count(self):
       return self.manager.task_count()
+
+   @dbus.service.method(dbus_interface="com.Gmilk.Interface",in_signature="",out_signature="sss")
+   def get_task(self,pos):
+      return self.manager.get_task(pos)

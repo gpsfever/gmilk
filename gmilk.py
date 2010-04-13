@@ -191,6 +191,14 @@ class Gmilk:
    def task_count(self):
       return self.today_count+self.tomorrow_count+self.due_count
 
+   def get_task(self,pos):
+      try:
+         all  = self.today_tasks+self.tomorrow_tasks+self.due_tasks
+         task = all[pos]
+         return [task.id,task.name,task.due]
+      except:
+         return [None,None,None]
+
    def tasks_alert(self):
       self.show_task_count()
       # no need to update icon if tasks count still the same
