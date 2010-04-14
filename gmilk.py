@@ -147,7 +147,7 @@ class Gmilk:
       tomorrow_str   = tomorrow.strftime("%Y-%m-%d")
 
       self.today_tasks    = self.rtm.get_task_list(Task.TODAY,"due:"+today_str+" NOT (completedBefore:"+today_str+" or completed:"+today_str+")")
-      self.tomorrow_tasks = self.rtm.get_task_list(Task.TOMORROW,"due:"+tomorrow_str)
+      self.tomorrow_tasks = self.rtm.get_task_list(Task.TOMORROW,"due:"+tomorrow_str+" NOT (completedBefore:"+today_str+" or completed:"+today_str+")")
       self.due_tasks      = self.rtm.get_task_list(Task.DUE,"dueBefore:"+today_str+" NOT (completedBefore:"+today_str+" or completed:"+today_str+")")
 
       self.today_count     = len(self.today_tasks)
