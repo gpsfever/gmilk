@@ -218,7 +218,8 @@ class Gmilk:
       self.last = check
 
       self.eval_icon()
-      self.blinking(True)
+      if self.task_count()>0:
+         self.blinking(True)
       self.notify(_("%s tasks found.") % self.task_count())
 
    def blinking(self,blink):
