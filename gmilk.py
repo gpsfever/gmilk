@@ -350,6 +350,7 @@ class Gmilk:
       self.about.set_website(__website__)
       self.about.set_website_label(__website__)
       self.about.set_authors(["%s <%s>" % (__author__,__email__)])
+      self.about.set_logo(gtk.gdk.pixbuf_new_from_file(self.get_icon("empty.png")))
       self.about.run()
       self.about.destroy()
 
