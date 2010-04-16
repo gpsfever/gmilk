@@ -209,6 +209,15 @@ class Gmilk:
       except:
          return [None,None,None]
 
+   def remove_task(self,task):
+      indexes = [self.today_tasks,self.tomorrow_tasks,self.due_tasks]
+      for index in indexes:
+         for t in index:
+            if t==task:
+               index.remove(t)
+               return True
+      return False
+
    def tasks_alert(self):
       self.show_task_count()
       # no need to update icon if tasks count still the same
@@ -246,18 +255,23 @@ class Gmilk:
    def show_task_count(self):
       self.set_tooltip(_("%d tasks found.") % self.task_count())
 
-   def complete(self,widget,task=None):
+   def complete(self,widget,task=None,silent=False):
       if task==None:
          return
-      dialog = gtk.MessageDialog(None,gtk.DIALOG_MODAL,gtk.MESSAGE_QUESTION,gtk.BUTTONS_YES_NO,(_("Are you sure you want to mark task '%s' as completed?") % task.name))
-      rsp = dialog.run()
-      dialog.destroy()
-      if rsp==gtk.RESPONSE_NO:
-         return
+
+      if not silent:
+         dialog = gtk.MessageDialog(None,gtk.DIALOG_MODAL,gtk.MESSAGE_QUESTION,gtk.BUTTONS_YES_NO,(_("Are you sure you want to mark task '%s' as completed?") % task.name))
+         rsp = dialog.run()
+         dialog.destroy()
+         if rsp==gtk.RESPONSE_NO:
+            return
+
       self.set_tooltip(_("Marking '%s' task as complete ...") % task.name)
       try:
          if self.rtm.complete_task(task,self.timeline):
-            self.show_info(_("Task '%s' marked as completed.") % task.name)
+            self.remove_task(task)
+            if not silent:
+               self.show_info(_("Task '%s' marked as completed.") % task.name)
             if task.type == Task.TODAY:
                self.today_count -= 1
             elif task.type == Task.TOMORROW:
@@ -268,9 +282,11 @@ class Gmilk:
             if task.menu_item!=None:
                self.menu.remove(task.menu_item)
          else:
-            self.show_error(_("Could not mark task as complete."))
+            if not silent:
+               self.show_error(_("Could not mark task as complete."))
       except:
-         self.show_error(_("There was an error marking task as complete."))
+         if not silent:
+            self.show_error(_("There was an error marking task as complete."))
          return False
       self.show_task_count()
       self.eval_icon()

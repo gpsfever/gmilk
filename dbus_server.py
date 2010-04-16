@@ -13,8 +13,8 @@ class DbusServer(dbus.service.Object):
       return self.manager.get_task(pos)
 
    @dbus.service.method(dbus_interface="com.Gmilk.Interface",in_signature="",out_signature="b")
-   def complete_task(self,id):
+   def complete_task(self,id,silent=False):
       task = self.manager.find_task_by_id(id)
       if task==None:
          return False
-      return self.manager.complete(None,task)
+      return self.manager.complete(None,task,silent)
