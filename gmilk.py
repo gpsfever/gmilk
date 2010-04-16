@@ -35,7 +35,7 @@ try:
 except:
    dbus_enabled = 0
 
-BASE_DIRS = [os.path.join(os.path.expanduser("~"), ".local", "share"),"/usr/local/share", "/usr/share"]
+BASE_DIRS = [os.path.join(os.path.expanduser("~"), ".local", "share"),"/usr/share/pyshared","/usr/local/share", "/usr/share"]
 DATA_DIRS = [os.path.abspath(sys.path[0])] + [os.path.join(d,__appname__.lower()) for d in BASE_DIRS]
 
 gettext.bindtextdomain(__appname__.lower())

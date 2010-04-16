@@ -1,6 +1,6 @@
 APP=gmilk
 BIN=/usr/bin/gmilk
-BASE=/usr/local/share/$(APP)
+BASE=/usr/share/pyshared/$(APP)
 LIB=$(BASE)/lib/
 IMAGES=$(BASE)/images/
 LOCALE=/usr/share
