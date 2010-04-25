@@ -319,7 +319,11 @@ class Gmilk:
       dialog.destroy()
 
    def authorize(self,widget,data=None):
-      (url,frob) = self.rtm.auth_url("write")
+      (url,frob,msg) = self.rtm.auth_url("write")
+
+      if frob==None:
+         self.show_error("Error with Remember the Milk API: %s" % msg)
+         return
 
       self.gconf.set_string("/apps/gmilk/frob",frob)
 

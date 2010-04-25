@@ -26,9 +26,10 @@ class Rtm:
          args = {'method': 'rtm.auth.getFrob'}
          url = self.get_url(RTM_SERVICE_METHODS, args, False)
          rsp = self.get_response(url)
-         return rsp.getElementsByTagName("frob")[0].childNodes[0].data
+         return (rsp.getElementsByTagName("frob")[0].childNodes[0].data,None)
       except Exception as detail:
-         sys.stderr.write("Error on get_frob: "+detail)
+         sys.stderr.write("Error on get_frob: %s" % detail)
+         return (None,detail.__str__())
 
    def get_auth_token(self, frob):
       args = {'method': 'rtm.auth.getToken'}
@@ -115,9 +116,11 @@ class Rtm:
       Give this URL to the user that he can give permission to this application
       @param token: Can be read, write or delete
       """
-      frob = self.get_frob()
+      frob, msg = self.get_frob()
+      if frob==None:
+         return (None,None,msg)
       args = {'perms': perms}
-      return (self.get_url(RTM_SERVICE_AUTH, args, False, frob), frob)
+      return (self.get_url(RTM_SERVICE_AUTH, args, False, frob), frob, msg)
 
    def create_timeline(self):
       args  = {'method': 'rtm.timelines.create'}    
