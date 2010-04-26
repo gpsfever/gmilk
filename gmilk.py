@@ -247,6 +247,10 @@ class Gmilk:
          else:
             self.menuItem = gtk.MenuItem("- %s" % task.name)
          self.menuItem.connect('activate', self.complete, task)
+
+         if task.notes!=None and len(task.notes)>0:
+            self.menuItem.set_tooltip_text("\n".join(task.notes))
+
          self.menu.append(self.menuItem)
          task.menu_item = self.menuItem
 
