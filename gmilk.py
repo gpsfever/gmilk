@@ -22,6 +22,7 @@ pygtk.require('2.0')
 
 from rtm import *
 from task import *
+from configwindow import *
 
 try:
    import pynotify
@@ -56,7 +57,6 @@ class Gmilk:
 
    def __init__(self):
       self.menu = gtk.Menu()
-      self.timeout = 15
 
       self.statusIcon = gtk.StatusIcon()
       self.statusIcon.set_from_file(self.get_icon("empty.png"))
@@ -90,11 +90,17 @@ class Gmilk:
       self.today_count     = 0
       self.tomorrow_count  = 0
       self.due_count       = 0
+      self.configItem      = None
       self.aboutItem       = None
       self.quitItem        = None
       self.today_tasks     = []
       self.tomorrow_tasks  = []
       self.due_tasks       = []
+
+      self.interval = self.gconf.get_int("/apps/gmilk/interval")
+      if self.interval<1:
+         self.interval = 5
+         self.gconf.set_int("/apps/gmilk/interval",self.interval)
 
       if self.rtm.check_token(self.token):
          self.rtm.set_auth_token(self.token)
@@ -116,12 +122,22 @@ class Gmilk:
       self.set_tooltip(_("Need to authorize. Click on 'Authorize' on the menu."))
       self.blinking(True)
 
+      self.make_control_menuitems()
+
+   def make_control_menuitems(self):
+      self.make_config_menuitem()
       self.make_about_menuitem()
       self.make_quit_menuitem()
 
    def remove_authorize_menuitem(self):
       if self.authorizeItem!=None:
          self.menu.remove(self.authorizeItem)
+
+   def make_config_menuitem(self):
+      if self.configItem==None:
+         self.configItem = gtk.MenuItem(_("Configuration"))
+         self.configItem.connect('activate',self.config,self.statusIcon)
+      self.menu.append(self.configItem)         
 
    def make_about_menuitem(self):
       if self.aboutItem==None:
@@ -160,9 +176,8 @@ class Gmilk:
       self.add_tasks(_("No due tasks")      if len(self.due_tasks)<1      else _("Due tasks")     ,self.due_tasks,True)
 
       self.tasks_alert()
-      self.make_about_menuitem()
-      self.make_quit_menuitem()
-      gobject.timeout_add(1000*60*self.timeout,self.check_tasks)
+      self.make_control_menuitems()
+      gobject.timeout_add(1000*60*self.interval,self.check_tasks)
 
    def notify(self,msg):
       noti = pynotify.Notification(_("Tasks alert"),msg,self.get_icon("today.png"))
@@ -363,6 +378,9 @@ class Gmilk:
          self.check_tasks()
       else:
          self.show_error(_("Invalid authorization, please try again."))
+
+   def config(self,widget,data=None):
+      dialog = ConfigWindow(self)
 
    def about(self,widget,data=None):
       self.about = gtk.AboutDialog()
