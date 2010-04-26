@@ -53,6 +53,14 @@ class InitThread(threading.Thread):
    def run(self):
       self.gui.init()
 
+class CheckThread(threading.Thread):
+   def __init__(self,gui):
+      super(CheckThread,self).__init__()
+      self.gui = gui
+
+   def run(self):
+      self.gui.check_tasks()
+
 class Gmilk:
 
    def __init__(self):
@@ -91,11 +99,13 @@ class Gmilk:
       self.tomorrow_count  = 0
       self.due_count       = 0
       self.configItem      = None
+      self.checkItem       = None
       self.aboutItem       = None
       self.quitItem        = None
       self.today_tasks     = []
       self.tomorrow_tasks  = []
       self.due_tasks       = []
+      self.manual          = False
 
       self.interval = self.gconf.get_int("/apps/gmilk/interval")
       if self.interval<1:
@@ -126,6 +136,7 @@ class Gmilk:
 
    def make_control_menuitems(self):
       self.make_config_menuitem()
+      self.make_check_menuitem()
       self.make_about_menuitem()
       self.make_quit_menuitem()
 
@@ -139,6 +150,13 @@ class Gmilk:
          self.configItem.connect('activate',self.config,self.statusIcon)
       self.menu.append(self.configItem)         
 
+   def make_check_menuitem(self):
+      if self.checkItem==None:
+         self.checkItem = gtk.MenuItem(_("Check now!"))
+         self.checkItem.connect('activate', self.check_now)
+      self.menu.append(self.checkItem)
+      return self.checkItem
+
    def make_about_menuitem(self):
       if self.aboutItem==None:
          self.aboutItem = gtk.MenuItem(_("About"))
@@ -151,10 +169,24 @@ class Gmilk:
          self.quitItem.connect('activate', self.quit, self.statusIcon)
       self.menu.append(self.quitItem)
 
+   def check_now(self,widget,data=None):
+      self.check_thread()
+      self.manual = True
+
+   def check_thread(self):
+      t = CheckThread(self)
+      t.start()
+
    def check_tasks(self):
+      if self.manual:
+         self.manual = False
+         self.schedule_next_check()
+         return
+
       if(self.timeline==None):
          self.set_tooltip(_("Creating a timeline ..."))
          self.timeline = self.rtm.create_timeline()
+
       self.set_tooltip(_("Checking your tasks ..."))
 
       today          = datetime.date.today()
@@ -177,6 +209,9 @@ class Gmilk:
 
       self.tasks_alert()
       self.make_control_menuitems()
+      self.schedule_next_check()
+
+   def schedule_next_check(self):
       gobject.timeout_add(1000*60*self.interval,self.check_tasks)
 
    def notify(self,msg):
