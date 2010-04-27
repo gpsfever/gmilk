@@ -129,6 +129,7 @@ class Gmilk:
       self.statusIcon.set_tooltip(text)
 
    def clear_menu(self):
+      self.tagged_items = {}
       for menuitem in self.menu.get_children():
          self.menu.remove(menuitem)
 
