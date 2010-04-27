@@ -108,6 +108,7 @@ class Gmilk:
       self.due_tasks       = []
       self.tagged_tasks    = []
       self.manual          = False
+      self.tagged_items    = {}
 
       self.interval = self.gconf.get_int("/apps/gmilk/interval")
       if self.interval<1:
@@ -303,19 +304,34 @@ class Gmilk:
       self.menu.append(self.menuItem)
 
       for task in tasks:
+         if tagged and len(task.tags)>0:
+            tags = ", ".join(sorted(task.tags))
+            if not tags in self.tagged_items:
+               item = gtk.MenuItem("- "+tags.capitalize())
+               menu = gtk.Menu()
+               item.set_submenu(menu)
+               self.menu.append(item)
+               self.tagged_items[tags] = menu
+               pre = ""
+            else:
+               menu = self.tagged_items[tags]
+         else:
+            menu  = self.menu
+            pre   = "-"
+
          due = task.due
          if show_due:
             due = datetime.datetime.strptime(due, "%Y-%m-%dT%H:%M:%SZ")
             due = due.strftime(_("%m/%d/%Y"))
-            self.menuItem = gtk.MenuItem(_("- %(title)s due on %(date)s") % {'title':task.name,'date':due})
+            self.menuItem = gtk.MenuItem(_("%(pre)s %(title)s due on %(date)s") % {'title':task.name,'date':due,'pre':pre})
          else:
-            self.menuItem = gtk.MenuItem("- %s" % task.name)
+            self.menuItem = gtk.MenuItem("%(pre)s %(title)s" % {'title':task.name,'pre':pre})
          self.menuItem.connect('activate', self.complete, task)
 
          if task.notes!=None and len(task.notes)>0:
             self.menuItem.set_tooltip_text("\n".join(task.notes))
 
-         self.menu.append(self.menuItem)
+         menu.append(self.menuItem)
          task.menu_item = self.menuItem
 
       self.menu.append(gtk.SeparatorMenuItem())
