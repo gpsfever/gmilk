@@ -156,6 +156,7 @@ class Rtm:
              sid  = taskseries_node.getAttribute("id")
              task = taskseries_node.getElementsByTagName("task")
              nts  = taskseries_node.getElementsByTagName("notes")
+             ntg  = taskseries_node.getElementsByTagName("tags")
              id   = task[0].getAttribute("id")	if len(task)>0 else taskseries_node.getAttribute("id")
              due  = task[0].getAttribute("due") if len(task)>0 else taskseries_node.getAttribute("due")
              name = taskseries_node.getAttribute("name")
@@ -165,5 +166,10 @@ class Rtm:
              for note in notes:
                 note_str.append(note.firstChild.data)
 
-             tasks.append(Task(type,id,name,due,list_id,sid,None,note_str))
+             tags_str = []
+             tags     = ntg[0].getElementsByTagName("tag")
+             for tag in tags:
+                tags_str.append(tag.firstChild.data)
+
+             tasks.append(Task(type,id,name,due,list_id,sid,None,note_str,tags_str))
       return tasks

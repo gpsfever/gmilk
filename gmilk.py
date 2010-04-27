@@ -98,6 +98,7 @@ class Gmilk:
       self.today_count     = 0
       self.tomorrow_count  = 0
       self.due_count       = 0
+      self.tagged_count    = 0
       self.configItem      = None
       self.checkItem       = None
       self.aboutItem       = None
@@ -105,12 +106,17 @@ class Gmilk:
       self.today_tasks     = []
       self.tomorrow_tasks  = []
       self.due_tasks       = []
+      self.tagged_tasks    = []
       self.manual          = False
 
       self.interval = self.gconf.get_int("/apps/gmilk/interval")
       if self.interval<1:
          self.interval = 5
          self.gconf.set_int("/apps/gmilk/interval",self.interval)
+
+      self.tags = self.gconf.get_list("/apps/gmilk/tags",gconf.VALUE_STRING)
+      if self.tags==None or len(self.tags)<1:
+         self.tags = []
 
       if self.rtm.check_token(self.token):
          self.rtm.set_auth_token(self.token)
@@ -198,14 +204,22 @@ class Gmilk:
       self.tomorrow_tasks = self.rtm.get_task_list(Task.TOMORROW,"due:"+tomorrow_str+" NOT (completedBefore:"+today_str+" or completed:"+today_str+")")
       self.due_tasks      = self.rtm.get_task_list(Task.DUE,"dueBefore:"+today_str+" NOT (completedBefore:"+today_str+" or completed:"+today_str+")")
 
+      if len(self.tags)>0:
+         tag_filter = "("+(" or ".join(["tag:%s" % tag for tag in self.tags]))+")"
+         self.tagged_tasks = self.rtm.get_task_list(Task.TAGGED,"due:never AND NOT (completedBefore:"+today_str+" or completed:"+today_str+") AND "+tag_filter)
+      else:
+         self.tagged_tasks = []
+
       self.today_count     = len(self.today_tasks)
       self.tomorrow_count  = len(self.tomorrow_tasks)
       self.due_count       = len(self.due_tasks)
+      self.tagged_count    = len(self.tagged_tasks)
 
       self.clear_menu()
-      self.add_tasks(_("No tasks today")    if len(self.today_tasks)<1    else _("Today tasks")   ,self.today_tasks,False)
-      self.add_tasks(_("No tasks tomorrow") if len(self.tomorrow_tasks)<1 else _("Tomorrow tasks"),self.tomorrow_tasks,False)
-      self.add_tasks(_("No due tasks")      if len(self.due_tasks)<1      else _("Due tasks")     ,self.due_tasks,True)
+      self.add_tasks(_("No tasks today")    if len(self.today_tasks)<1    else _("Today tasks")   ,self.today_tasks,False,False)
+      self.add_tasks(_("No tasks tomorrow") if len(self.tomorrow_tasks)<1 else _("Tomorrow tasks"),self.tomorrow_tasks,False,False)
+      self.add_tasks(_("No due tasks")      if len(self.due_tasks)<1      else _("Due tasks")     ,self.due_tasks,True,False)
+      self.add_tasks(_("No tagged tasks")   if len(self.tagged_tasks)<1   else _("Tagged tasks")  ,self.tagged_tasks,False,True)
 
       self.tasks_alert()
       self.make_control_menuitems()
@@ -239,11 +253,11 @@ class Gmilk:
          self.statusIcon.set_from_file(self.get_icon("empty.png"))
 
    def task_count(self):
-      return self.today_count+self.tomorrow_count+self.due_count
+      return self.today_count+self.tomorrow_count+self.due_count+self.tagged_count
 
    def find_task_by_id(self,id):
       try:
-         all = self.today_tasks+self.tomorrow_tasks+self.due_tasks
+         all = self.today_tasks+self.tomorrow_tasks+self.due_tasks+self.tagged_tasks
          for task in all:
             if task.id==id:
                return task
@@ -253,14 +267,14 @@ class Gmilk:
 
    def get_task(self,pos):
       try:
-         all  = self.today_tasks+self.tomorrow_tasks+self.due_tasks
+         all  = self.today_tasks+self.tomorrow_tasks+self.due_tasks+self.tagged_tasks
          task = all[pos]
          return [task.id,task.name,task.due]
       except:
          return [None,None,None]
 
    def remove_task(self,task):
-      indexes = [self.today_tasks,self.tomorrow_tasks,self.due_tasks]
+      indexes = [self.today_tasks,self.tomorrow_tasks,self.due_tasks,self.tagged_tasks]
       for index in indexes:
          for t in index:
             if t==task:
@@ -284,7 +298,7 @@ class Gmilk:
    def blinking(self,blink):
       self.statusIcon.set_blinking(blink)
 
-   def add_tasks(self,title,tasks,show_due):
+   def add_tasks(self,title,tasks,show_due,tagged=False):
       self.menuItem = gtk.MenuItem(title)
       self.menu.append(self.menuItem)
 
@@ -330,8 +344,10 @@ class Gmilk:
                self.today_count -= 1
             elif task.type == Task.TOMORROW:
                self.tomorrow_count -= 1
-            else:
+            elif task.type == Task.DUE:
                self.due_count -= 1
+            else:
+               self.tagged_count -= 1
             self.last = self.make_check()
             if task.menu_item!=None:
                self.menu.remove(task.menu_item)
