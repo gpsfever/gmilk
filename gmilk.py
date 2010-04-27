@@ -328,7 +328,7 @@ class Gmilk:
             due = due.strftime(_("%m/%d/%Y"))
             self.menuItem = gtk.MenuItem(_("%(pre)s %(title)s due on %(date)s") % {'title':task.name,'date':due,'pre':pre})
          else:
-            self.menuItem = gtk.MenuItem("%(pre)s %(title)s" % {'title':task.name,'pre':pre})
+            self.menuItem = gtk.MenuItem(_("%(pre)s %(title)s") % {'title':task.name,'pre':pre})
          self.menuItem.connect('activate', self.complete, task)
 
          if task.notes!=None and len(task.notes)>0:
