@@ -303,6 +303,9 @@ class Gmilk:
       self.menuItem = gtk.MenuItem(title)
       self.menu.append(self.menuItem)
 
+      menu  = self.menu
+      pre   = "-"
+
       for task in tasks:
          if tagged and len(task.tags)>0:
             tags = ", ".join(sorted(task.tags))
@@ -365,14 +368,22 @@ class Gmilk:
             else:
                self.tagged_count -= 1
             self.last = self.make_check()
+
             if task.menu_item!=None:
-               self.menu.remove(task.menu_item)
+               parent = task.menu_item.parent
+               if parent==self.menu:
+                  self.menu.remove(task.menu_item)
+               else:
+                  parent.remove(task.menu_item) # testeeeeeee
+                  if len(parent.get_children())<1: # - Teste
+                     widget = parent.get_attach_widget()
+                     self.menu.remove(widget)
          else:
             if not silent:
                self.show_error(_("Could not mark task as complete."))
-      except:
+      except Exception as exc:
          if not silent:
-            self.show_error(_("There was an error marking task as complete."))
+            self.show_error(_("There was an error marking task as complete: %s") % exc)
          return False
       self.show_task_count()
       self.eval_icon()
