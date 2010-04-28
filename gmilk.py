@@ -107,7 +107,6 @@ class Gmilk:
       self.tomorrow_tasks  = []
       self.due_tasks       = []
       self.tagged_tasks    = []
-      self.manual          = False
       self.tagged_items    = {}
 
       self.interval = self.gconf.get_int("/apps/gmilk/interval")
@@ -179,18 +178,12 @@ class Gmilk:
 
    def check_now(self,widget,data=None):
       self.check_thread()
-      self.manual = True
 
    def check_thread(self):
       t = CheckThread(self)
       t.start()
 
    def check_tasks(self):
-      if self.manual:
-         self.manual = False
-         self.schedule_next_check()
-         return
-
       if(self.timeline==None):
          self.set_tooltip(_("Creating a timeline ..."))
          self.timeline = self.rtm.create_timeline()
