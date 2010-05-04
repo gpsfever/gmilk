@@ -1,4 +1,5 @@
 import sys
+import time
 import locale
 import gettext
 import urllib
@@ -20,6 +21,7 @@ class Rtm:
    def __init__(self,ui):
       self.ui = ui
       self.auth_token = ""
+      self.check = True
 
    def get_frob(self):
       try:
@@ -84,7 +86,23 @@ class Rtm:
          sys.stderr.write("Error on sign_args: "+detail)
       return args
 
+   def connectivity(self):
+      for i in range(10):
+         print "Checking connectivity: %d" % i
+         try:
+            urllib.urlopen(RTM_HOME)
+            print "Connected."
+            return True
+         except Exception as exc:
+            print "Failed connectivity: %d %s" % (i,exc)
+         time.sleep(5)
+      return False
+
    def get_response(self, url):
+      if self.check and not self.connectivity():
+         raise Exception, "Failed to connect"
+      self.check = False
+
       dom = xml.dom.minidom.parse(urllib.urlopen(url))
       rsp = dom.getElementsByTagName("rsp")[0]
       stat = rsp.getAttribute('stat')
@@ -92,6 +110,7 @@ class Rtm:
          return rsp
       else:
          self.raise_error(dom)
+         self.check = True
 
    def get_signature(self, args):
       """
