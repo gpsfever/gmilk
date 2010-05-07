@@ -87,7 +87,7 @@ class Rtm:
       return args
 
    def connectivity(self):
-      for i in range(10):
+      for i in range(30):
          print "Checking connectivity: %d" % i
          try:
             urllib.urlopen(RTM_HOME)
