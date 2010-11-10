@@ -2,11 +2,11 @@
 __appname__    = "Gmilk"
 __author__     = "Eustaquio 'TaQ' Rangel"
 __copyright__  = "2010 Eustaquio 'TaQ' Rangel"
-__version__    = "0.1.1"
+__version__    = "0.1.2"
 __license__    = "GPL"
 __email__      = "eustaquiorangel@gmail.com"
 __website__    = "http://github.com/taq/gmilk"
-__date__       = "$Date: 2010/04/12 12:00:00$"
+__date__       = "$Date: 2010/11/10 12:00:00$"
 
 import os
 import threading
@@ -325,8 +325,16 @@ class Gmilk:
             self.menuItem = gtk.MenuItem(_("%(pre)s %(title)s") % {'title':task.name,'pre':pre})
          self.menuItem.connect('activate', self.complete, task)
 
+         tooltip = ""
          if task.notes!=None and len(task.notes)>0:
-            self.menuItem.set_tooltip_text("\n".join(task.notes))
+            tooltip = "\n".join(task.notes)
+
+         if task.url!=None and len(task.url)>0:
+            tooltip += "\n" if len(tooltip)>0 else ""
+            tooltip += "URL: "+task.url
+
+         if len(tooltip)>0:
+            self.menuItem.set_tooltip_text(tooltip)
 
          menu.append(self.menuItem)
          task.menu_item = self.menuItem
